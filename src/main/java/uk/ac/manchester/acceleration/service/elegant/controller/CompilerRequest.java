@@ -6,13 +6,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class CompilerRequest {
     private long id;
     private String functionCode;
-    private String deviceInfo;
+    private DeviceInfo deviceInfo;
 
     public CompilerRequest() {
 
     }
 
-    public CompilerRequest(long id, String functionCode, String deviceInfo) {
+    public CompilerRequest(long id, String functionCode, DeviceInfo deviceInfo) {
         this.id = id;
         this.functionCode = functionCode;
         this.deviceInfo = deviceInfo;
@@ -26,7 +26,7 @@ public class CompilerRequest {
         return functionCode;
     }
 
-    public String getDeviceInfo() {
+    public DeviceInfo getDeviceInfo() {
         return deviceInfo;
     }
 
@@ -38,7 +38,7 @@ public class CompilerRequest {
         this.functionCode = functionCode;
     }
 
-    public void setDeviceInfo(String deviceInfo) {
+    public void setDeviceInfo(DeviceInfo deviceInfo) {
         this.deviceInfo = deviceInfo;
     }
 }
