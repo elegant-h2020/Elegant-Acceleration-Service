@@ -8,6 +8,9 @@ public class DeviceInfo {
     private String deviceExtensions;
     private int availableProcessors;
 
+    public DeviceInfo() {
+    }
+
     public DeviceInfo(String deviceName, boolean doubleFPSupport, int deviceAddressBits, String deviceType, String deviceExtensions, int availableProcessors) {
         this.deviceName = deviceName;
         this.doubleFPSupport = doubleFPSupport;
