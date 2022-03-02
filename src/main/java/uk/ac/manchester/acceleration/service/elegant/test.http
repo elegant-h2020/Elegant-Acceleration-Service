@@ -1,0 +1,58 @@
+###
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/count
+#
+
+###
+POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
+Accept: application/json
+Content-Type: application/json
+
+{
+  "functionCode": "foo1",
+  "deviceInfo": "Nvidia GPU1"
+}
+
+###
+POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
+Accept: application/json
+Content-Type: application/json
+
+{
+  "functionCode": "foo2",
+  "deviceInfo": "Nvidia GPU2"
+}
+
+###
+POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
+Accept: application/json
+Content-Type: application/json
+
+{
+  "functionCode": "foo3",
+  "deviceInfo": "Nvidia GPU3"
+}
+
+###
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
+#
+
+###
+PUT http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
+Accept: application/json
+Content-Type: application/json
+
+{
+  "functionCode": "foo2",
+  "deviceInfo": "Nvidia GPU4"
+}
+
+###
+DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
+
+###
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
+#
+
+###
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
+#
