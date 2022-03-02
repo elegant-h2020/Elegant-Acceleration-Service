@@ -8,8 +8,32 @@ Accept: application/json
 Content-Type: application/json
 
 {
+  "functionCode": "foo0",
+  "deviceInfo": {
+    "deviceName" : "Nvidia GPU",
+    "doubleFPSupport" : true,
+    "deviceAddressBits" : 64,
+    "deviceType" : "CL_DEVICE_TYPE_GPU",
+    "deviceExtensions" : "cl_khr_int64_base_atomics",
+    "availableProcessors" : 12
+  }
+}
+
+###
+POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
+Accept: application/json
+Content-Type: application/json
+
+{
   "functionCode": "foo1",
-  "deviceInfo": "Nvidia GPU1"
+  "deviceInfo": {
+    "deviceName" : "Nvidia GPU 1",
+    "doubleFPSupport" : true,
+    "deviceAddressBits" : 64,
+    "deviceType" : "CL_DEVICE_TYPE_GPU",
+    "deviceExtensions" : "cl_khr_int64_base_atomics",
+    "availableProcessors" : 12
+  }
 }
 
 ###
@@ -19,7 +43,14 @@ Content-Type: application/json
 
 {
   "functionCode": "foo2",
-  "deviceInfo": "Nvidia GPU2"
+  "deviceInfo": {
+    "deviceName" : "Nvidia GPU 2",
+    "doubleFPSupport" : false,
+    "deviceAddressBits" : 12,
+    "deviceType" : "CL_DEVICE_TYPE_GPU",
+    "deviceExtensions" : "cl_khr_int64_base_atomics",
+    "availableProcessors" : 128
+  }
 }
 
 ###
@@ -29,7 +60,14 @@ Content-Type: application/json
 
 {
   "functionCode": "foo3",
-  "deviceInfo": "Nvidia GPU3"
+  "deviceInfo": {
+    "deviceName" : "Nvidia GPU 3",
+    "doubleFPSupport" : true,
+    "deviceAddressBits" : 32,
+    "deviceType" : "CL_DEVICE_TYPE_GPU",
+    "deviceExtensions" : "cl_khr_int64_base_atomics",
+    "availableProcessors" : 1024
+  }
 }
 
 ###
@@ -43,7 +81,14 @@ Content-Type: application/json
 
 {
   "functionCode": "foo2",
-  "deviceInfo": "Nvidia GPU4"
+  "deviceInfo": {
+    "deviceName" : "Nvidia GPU 10",
+    "doubleFPSupport" : true,
+    "deviceAddressBits" : 64,
+    "deviceType" : "CL_DEVICE_TYPE_GPU",
+    "deviceExtensions" : "cl_khr_int64_base_atomics",
+    "availableProcessors" : 65536
+  }
 }
 
 ###
