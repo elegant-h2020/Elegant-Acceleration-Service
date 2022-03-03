@@ -12,6 +12,7 @@ Content-Type: application/json
   "deviceInfo": {
     "deviceName" : "Nvidia GPU",
     "doubleFPSupport" : true,
+
     "deviceAddressBits" : 64,
     "deviceType" : "CL_DEVICE_TYPE_GPU",
     "deviceExtensions" : "cl_khr_int64_base_atomics",
@@ -29,6 +30,11 @@ Content-Type: application/json
   "deviceInfo": {
     "deviceName" : "Nvidia GPU 1",
     "doubleFPSupport" : true,
+    "maxWorkItems": {
+      "dim1" : 12,
+      "dim2" : 1,
+      "dim3" : 1
+    },
     "deviceAddressBits" : 64,
     "deviceType" : "CL_DEVICE_TYPE_GPU",
     "deviceExtensions" : "cl_khr_int64_base_atomics",
@@ -46,6 +52,11 @@ Content-Type: application/json
   "deviceInfo": {
     "deviceName" : "Nvidia GPU 2",
     "doubleFPSupport" : false,
+    "maxWorkItems": {
+      "dim1" : 16,
+      "dim2" : 1,
+      "dim3" : 1
+    },
     "deviceAddressBits" : 12,
     "deviceType" : "CL_DEVICE_TYPE_GPU",
     "deviceExtensions" : "cl_khr_int64_base_atomics",
@@ -63,6 +74,11 @@ Content-Type: application/json
   "deviceInfo": {
     "deviceName" : "Nvidia GPU 3",
     "doubleFPSupport" : true,
+    "maxWorkItems": {
+      "dim1" : 1,
+      "dim2" : 1,
+      "dim3" : 1
+    },
     "deviceAddressBits" : 32,
     "deviceType" : "CL_DEVICE_TYPE_GPU",
     "deviceExtensions" : "cl_khr_int64_base_atomics",
@@ -84,6 +100,11 @@ Content-Type: application/json
   "deviceInfo": {
     "deviceName" : "Nvidia GPU 10",
     "doubleFPSupport" : true,
+    "maxWorkItems": {
+      "dim1" : 1024,
+      "dim2" : 64,
+      "dim3" : 1
+    },
     "deviceAddressBits" : 64,
     "deviceType" : "CL_DEVICE_TYPE_GPU",
     "deviceExtensions" : "cl_khr_int64_base_atomics",

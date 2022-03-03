@@ -3,6 +3,7 @@ package uk.ac.manchester.acceleration.service.elegant.controller;
 public class DeviceInfo {
     private String deviceName;
     private boolean doubleFPSupport;
+    private MaxWorkItems maxWorkItems;
     private int deviceAddressBits;
     private String deviceType;
     private String deviceExtensions;
@@ -11,9 +12,10 @@ public class DeviceInfo {
     public DeviceInfo() {
     }
 
-    public DeviceInfo(String deviceName, boolean doubleFPSupport, int deviceAddressBits, String deviceType, String deviceExtensions, int availableProcessors) {
+    public DeviceInfo(String deviceName, boolean doubleFPSupport, MaxWorkItems maxWorkItems, int deviceAddressBits, String deviceType, String deviceExtensions, int availableProcessors) {
         this.deviceName = deviceName;
         this.doubleFPSupport = doubleFPSupport;
+        this.maxWorkItems = maxWorkItems;
         this.deviceAddressBits = deviceAddressBits;
         this.deviceType = deviceType;
         this.deviceExtensions = deviceExtensions;
@@ -26,6 +28,10 @@ public class DeviceInfo {
 
     public boolean isDoubleFPSupport() {
         return doubleFPSupport;
+    }
+
+    public MaxWorkItems getMaxWorkItems() {
+        return maxWorkItems;
     }
 
     public int getDeviceAddressBits() {
@@ -50,6 +56,10 @@ public class DeviceInfo {
 
     public void setDoubleFPSupport(boolean doubleFPSupport) {
         this.doubleFPSupport = doubleFPSupport;
+    }
+
+    public void setMaxWorkItems(MaxWorkItems maxWorkItems) {
+        this.maxWorkItems = maxWorkItems;
     }
 
     public void setDeviceAddressBits(int deviceAddressBits) {
