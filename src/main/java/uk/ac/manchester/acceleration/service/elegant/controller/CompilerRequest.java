@@ -5,16 +5,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class CompilerRequest {
     private long id;
-    private String functionCode;
+    private FileInfo fileInfo;
     private DeviceInfo deviceInfo;
 
     public CompilerRequest() {
 
     }
 
-    public CompilerRequest(long id, String functionCode, DeviceInfo deviceInfo) {
+    public CompilerRequest(long id, FileInfo fileInfo, DeviceInfo deviceInfo) {
         this.id = id;
-        this.functionCode = functionCode;
+        this.fileInfo = fileInfo;
         this.deviceInfo = deviceInfo;
     }
 
@@ -22,8 +22,8 @@ public class CompilerRequest {
         return id;
     }
 
-    public String getFunctionCode() {
-        return functionCode;
+    public FileInfo getFileInfo() {
+        return fileInfo;
     }
 
     public DeviceInfo getDeviceInfo() {
@@ -34,8 +34,8 @@ public class CompilerRequest {
         this.id = id;
     }
 
-    public void setFunctionCode(String functionCode) {
-        this.functionCode = functionCode;
+    public void setFileInfo(FileInfo fileInfo) {
+        this.fileInfo = fileInfo;
     }
 
     public void setDeviceInfo(DeviceInfo deviceInfo) {
