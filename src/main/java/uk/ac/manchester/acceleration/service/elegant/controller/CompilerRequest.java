@@ -26,12 +26,6 @@ public class CompilerRequest {
         return fileInfo;
     }
 
-    public String getFunctionProgrammingLanguage() { return this.fileInfo.getProgrammingLanguage(); }
-
-    public String getFunctionName() { return this.fileInfo.getFunctionName(); }
-
-    public String getDirectory() { return this.fileInfo.getDirectory(); }
-
     public DeviceInfo getDeviceInfo() {
         return deviceInfo;
     }
