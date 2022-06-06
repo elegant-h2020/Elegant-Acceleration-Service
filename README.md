@@ -1,5 +1,5 @@
 # ELEGANT Acceleration Service
-A web service that provides code that can run on hardware accelerators
+A web service that provides code that can run on hardware accelerators (e.g. GPUs).
 
 ## Description
 
