@@ -12,7 +12,7 @@ The project uses JAX-RS to implement a portable API for the development, exposur
 1. Clone the project:
 
 ```bash 
-git clone https://github.com/stratika/elegant-acceleration-service
+git clone git@github.com:elegant-h2020/Elegant-Acceleration-Service.git
 ```
 
 2. Build the service:
