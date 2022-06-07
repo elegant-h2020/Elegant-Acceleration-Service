@@ -1,6 +1,6 @@
 /*
  * This file is part of the ELEGANT Acceleration Service.
- * URL: https://github.com/stratika/elegant-acceleration-service
+ * URL: https://github.com/elegant-h2020/Elegant-Acceleration-Service.git
  *
  * Copyright (c) 2022, APT Group, Department of Computer Science,
  * The University of Manchester. All rights reserved.
