@@ -8,7 +8,10 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "functionCode": "foo0",
+  "fileInfo": {
+    "functionName": "foo0",
+    "programmingLanguage": "Java"
+  },
   "deviceInfo": {
     "deviceName" : "Nvidia GPU",
     "doubleFPSupport" : true,
@@ -16,7 +19,7 @@ Content-Type: application/json
     "deviceAddressBits" : 64,
     "deviceType" : "CL_DEVICE_TYPE_GPU",
     "deviceExtensions" : "cl_khr_int64_base_atomics",
-    "availableProcessors" : 12
+    "availableProcessors" : 2048
   }
 }
 
@@ -26,19 +29,18 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "functionCode": "foo1",
+  "fileInfo": {
+    "functionName": "foo1",
+    "programmingLanguage": "C++"
+  },
   "deviceInfo": {
     "deviceName" : "Nvidia GPU 1",
     "doubleFPSupport" : true,
-    "maxWorkItems": {
-      "dim1" : 12,
-      "dim2" : 1,
-      "dim3" : 1
-    },
+
     "deviceAddressBits" : 64,
     "deviceType" : "CL_DEVICE_TYPE_GPU",
     "deviceExtensions" : "cl_khr_int64_base_atomics",
-    "availableProcessors" : 12
+    "availableProcessors" : 1024
   }
 }
 
@@ -48,7 +50,10 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "functionCode": "foo2",
+  "fileInfo": {
+    "functionName": "foo2",
+    "programmingLanguage": "Java"
+  },
   "deviceInfo": {
     "deviceName" : "Nvidia GPU 2",
     "doubleFPSupport" : false,
@@ -60,7 +65,7 @@ Content-Type: application/json
     "deviceAddressBits" : 12,
     "deviceType" : "CL_DEVICE_TYPE_GPU",
     "deviceExtensions" : "cl_khr_int64_base_atomics",
-    "availableProcessors" : 128
+    "availableProcessors" : 1024
   }
 }
 
@@ -70,7 +75,10 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "functionCode": "foo3",
+  "fileInfo": {
+    "functionName": "foo3",
+    "programmingLanguage": "C"
+  },
   "deviceInfo": {
     "deviceName" : "Nvidia GPU 3",
     "doubleFPSupport" : true,
@@ -96,7 +104,10 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "functionCode": "foo2",
+  "fileInfo": {
+    "functionName": "foo2New",
+    "programmingLanguage": "C"
+  },
   "deviceInfo": {
     "deviceName" : "Nvidia GPU 10",
     "doubleFPSupport" : true,
@@ -113,6 +124,10 @@ Content-Type: application/json
 }
 
 ###
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
+#
+
+###
 DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
 
 ###
@@ -120,5 +135,9 @@ GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/accelerati
 #
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/state
+#
+
+###
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/3/state
 #
