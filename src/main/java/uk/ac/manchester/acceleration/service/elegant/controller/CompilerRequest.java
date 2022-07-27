@@ -23,9 +23,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class CompilerRequest {
+    public enum CompilationState { INITIAL, SUBMITTED, COMPLETED, UNSUPPORTED, FAILED }
+
     private long id;
     private FileInfo fileInfo;
     private DeviceInfo deviceInfo;
+
+    private CompilationState state;
 
     public CompilerRequest() {
 
@@ -35,6 +39,7 @@ public class CompilerRequest {
         this.id = id;
         this.fileInfo = fileInfo;
         this.deviceInfo = deviceInfo;
+        this.state = CompilationState.INITIAL;
     }
 
     public long getId() {
@@ -49,6 +54,8 @@ public class CompilerRequest {
         return deviceInfo;
     }
 
+    public CompilationState getState() { return state; }
+
     public void setId(long id) {
         this.id = id;
     }
@@ -60,4 +67,6 @@ public class CompilerRequest {
     public void setDeviceInfo(DeviceInfo deviceInfo) {
         this.deviceInfo = deviceInfo;
     }
+
+    public void setState(CompilationState state) { this.state = state; }
 }
