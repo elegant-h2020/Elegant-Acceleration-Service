@@ -46,7 +46,10 @@ c) Stop GlassFish local server:
 curl -X POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests \
    -H 'Content-Type: application/json' \
    -d '{
-      "functionCode": "foo",
+      "fileInfo": {
+        "functionName": "foo0",
+        "programmingLanguage": "Java"
+      },
       "deviceInfo": {
         "deviceName" : "Nvidia GPU 1",
         "doubleFPSupport" : true,
@@ -58,21 +61,24 @@ curl -X POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/a
         "deviceAddressBits" : 64,
         "deviceType" : "CL_DEVICE_TYPE_GPU",
         "deviceExtensions" : "cl_khr_int64_base_atomics",
-        "availableProcessors" : 12
+        "availableProcessors" : 2048
       }
     }'
 ```
 
 The response contains the input json file of the POST request, followed by an identifier:
 ```bash
-{"deviceInfo":{"availableProcessors":12,"deviceAddressBits":64,"deviceExtensions":"cl_khr_int64_base_atomics","deviceName":"Nvidia GPU 1","deviceType":"CL_DEVICE_TYPE_GPU","doubleFPSupport":true,"maxWorkItems":{"dim1":2048,"dim2":1,"dim3":1}},"id":1}
+{"deviceInfo":{"availableProcessors":2048,"deviceAddressBits":64,"deviceExtensions":"cl_khr_int64_base_atomics","deviceName":"Nvidia GPU 1","deviceType":"CL_DEVICE_TYPE_GPU","doubleFPSupport":true,"maxWorkItems":{"dim1":2048,"dim2":1,"dim3":1}},"fileInfo":{"functionName":"foo0","programmingLanguage":"Java"},"id":1,"state":"SUBMITTED"}
 ```
 
-This identifier can be used to retrieve a GET request, as follows:
+This identifier can be used to retrieve a GET request or the state of a request, as follows:
 ```bash
 curl http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1
 ```
 
+```bash
+curl http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/state
+```
 
 
 
