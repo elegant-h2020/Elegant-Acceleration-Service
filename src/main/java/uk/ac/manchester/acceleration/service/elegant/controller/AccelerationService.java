@@ -36,6 +36,7 @@ public class AccelerationService {
 
     public CompilerRequest addRequest(CompilerRequest request) {
         request.setId(requests.size() + 1);
+        request.setState(CompilerRequest.CompilationState.INITIAL);
         requests.put(request.getId(), request);
 
         return request;
