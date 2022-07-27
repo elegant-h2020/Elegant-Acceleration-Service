@@ -34,11 +34,11 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path("/acceleration/requests")
-public class HelloResource {
+public class ElegantAccelerationService {
 
     AccelerationService accelerationService = new AccelerationService();
 
-    public HelloResource() {
+    public ElegantAccelerationService() {
 
     }
 
