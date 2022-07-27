@@ -27,6 +27,15 @@ public class FileInfo {
     public FileInfo() {
     }
 
+    public FileInfo(String functionCode) {
+        this.functionName = functionCode;
+    }
+
+    public FileInfo(String functionCode, String programmingLanguage) {
+        this.functionName = functionCode;
+        this.programmingLanguage = programmingLanguage;
+    }
+
     public FileInfo(String functionCode, String directory, String programmingLanguage) {
         this.functionName = functionCode;
         this.directory = directory;
