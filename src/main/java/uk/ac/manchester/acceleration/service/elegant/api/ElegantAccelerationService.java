@@ -56,6 +56,13 @@ public class ElegantAccelerationService {
     }
 
     @GET
+    @Path("/{requestId}/state")
+    @Produces(MediaType.APPLICATION_JSON)
+    public CompilerRequest.CompilationState retrieveRequestState(@PathParam("requestId") long requestId) {
+        return accelerationService.getRequest(requestId).getState();
+    }
+
+    @GET
     @Path("/count")
     @Produces("text/plain")
     public String getCount() {
