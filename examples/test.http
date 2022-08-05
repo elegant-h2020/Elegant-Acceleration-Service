@@ -12,13 +12,23 @@ Content-Disposition: form-data; name="vectorAdd"; filename="vectorAdd.java"
 
 < ./inputFiles/vectorAdd.java
 --abcd
+Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo.json"
+
+< ./inputFiles/deviceInfo.json
+
+###
+POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/submit
+Accept: multipart/form-data
+Content-Type: multipart/form-data; boundary=abcd
+
+--abcd
 Content-Disposition: form-data; name="vectorAdd"; filename="vectorAdd.cpp"
 
 < ./inputFiles/vectorAdd.cpp
 --abcd
-Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo.json"
+Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo2.json"
 
-< ./inputFiles/deviceInfo.json
+< ./inputFiles/deviceInfo2.json
 
 ###
 POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
