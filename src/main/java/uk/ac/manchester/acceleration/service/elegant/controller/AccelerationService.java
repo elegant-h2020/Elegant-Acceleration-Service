@@ -22,9 +22,12 @@ package uk.ac.manchester.acceleration.service.elegant.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AccelerationService {
     private Map<Long, CompilerRequest> requests = RequestDatabase.getRequests();
+
+    private static ConcurrentHashMap<Long, String> mapOfUploadedFileNames = new ConcurrentHashMap<>();
 
     public List<CompilerRequest> getAllRequests() {
         return new ArrayList<CompilerRequest>(requests.values());
@@ -34,12 +37,19 @@ public class AccelerationService {
         return requests.get(id);
     }
 
+    public String getUploadedFileName(long id) {
+        return mapOfUploadedFileNames.get(id);
+    }
+
     public CompilerRequest addRequest(CompilerRequest request) {
-        request.setId(requests.size() + 1);
         request.setState(CompilerRequest.CompilationState.INITIAL);
         requests.put(request.getId(), request);
 
         return request;
+    }
+
+    public void addOrUpdateUploadedFileName(long id, String fileName) {
+        mapOfUploadedFileNames.put(id, fileName);
     }
 
     public CompilerRequest updateRequest(CompilerRequest request) {
@@ -52,5 +62,9 @@ public class AccelerationService {
 
     public CompilerRequest removeRequest(long id) {
         return requests.remove(id);
+    }
+
+    public void removeUploadedFileName(long id) {
+        mapOfUploadedFileNames.remove(id);
     }
 }
