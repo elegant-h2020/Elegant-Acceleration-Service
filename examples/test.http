@@ -115,7 +115,7 @@ GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/accelerati
 #
 
 ###
-PUT http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
+PUT http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2/resubmit
 Accept: application/json
 Content-Type: application/json
 

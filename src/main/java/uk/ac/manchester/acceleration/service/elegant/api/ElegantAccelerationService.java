@@ -163,7 +163,7 @@ public class ElegantAccelerationService {
     }
 
     @PUT
-    @Path("/{requestId}")
+    @Path("/{requestId}/resubmit")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public CompilerRequest updateAndCompile(@PathParam("requestId") long requestId, CompilerRequest request) {
