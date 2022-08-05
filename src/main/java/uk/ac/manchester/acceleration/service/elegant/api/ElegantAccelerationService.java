@@ -249,9 +249,7 @@ public class ElegantAccelerationService {
                     msg = "Files are not loaded correctly.";
                 }
             }
-        } catch (
-
-        FileUploadException e) {
+        } catch (FileUploadException e) {
             code = 404;
             msg = e.getMessage();
             e.printStackTrace();
