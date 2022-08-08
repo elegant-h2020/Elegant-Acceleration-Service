@@ -27,19 +27,20 @@ public class CompilerRequest {
         INITIAL, SUBMITTED, COMPLETED, UNSUPPORTED, FAILED
     }
 
-    private static long uid = 0;
     private long id;
     private FileInfo fileInfo;
     private DeviceInfo deviceInfo;
 
     private CompilationState state;
 
-    public CompilerRequest() {
-        this.id = ++uid;
+    public CompilerRequest(FileInfo fileInfo, DeviceInfo deviceInfo) {
+        this.fileInfo = fileInfo;
+        this.deviceInfo = deviceInfo;
+        this.state = CompilationState.INITIAL;
     }
 
-    public CompilerRequest(FileInfo fileInfo, DeviceInfo deviceInfo) {
-        this.id = ++uid;
+    public CompilerRequest(long id, FileInfo fileInfo, DeviceInfo deviceInfo) {
+        this.id = id;
         this.fileInfo = fileInfo;
         this.deviceInfo = deviceInfo;
         this.state = CompilationState.INITIAL;
