@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AccelerationService {
+public class ElegantRequestHandler {
     private Map<Long, CompilerRequest> requests = RequestDatabase.getRequests();
 
     private static ConcurrentHashMap<Long, String> mapOfUploadedFunctionFileNames = new ConcurrentHashMap<>();
