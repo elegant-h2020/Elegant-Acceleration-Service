@@ -27,7 +27,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AccelerationService {
     private Map<Long, CompilerRequest> requests = RequestDatabase.getRequests();
 
-    private static ConcurrentHashMap<Long, String> mapOfUploadedFileNames = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, String> mapOfUploadedFunctionFileNames = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, String> mapOfUploadedJsonFileNames = new ConcurrentHashMap<>();
+
+    private static long uid = 0;
+
+    public long getUid() {
+        return ++uid;
+    }
 
     public List<CompilerRequest> getAllRequests() {
         return new ArrayList<CompilerRequest>(requests.values());
@@ -37,8 +44,12 @@ public class AccelerationService {
         return requests.get(id);
     }
 
-    public String getUploadedFileName(long id) {
-        return mapOfUploadedFileNames.get(id);
+    public String getUploadedFunctionFileName(long id) {
+        return mapOfUploadedFunctionFileNames.get(id);
+    }
+
+    public String getUploadedJsonFileName(long id) {
+        return mapOfUploadedJsonFileNames.get(id);
     }
 
     public CompilerRequest addRequest(CompilerRequest request) {
@@ -46,10 +57,6 @@ public class AccelerationService {
         requests.put(request.getId(), request);
 
         return request;
-    }
-
-    public void addOrUpdateUploadedFileName(long id, String fileName) {
-        mapOfUploadedFileNames.put(id, fileName);
     }
 
     public CompilerRequest updateRequest(CompilerRequest request) {
@@ -60,11 +67,25 @@ public class AccelerationService {
         return request;
     }
 
+    public void addOrUpdateUploadedFunctionFileName(CompilerRequest request, String functionFileName) {
+        System.out.println("Add " + functionFileName + " - for id: " + request.getId());
+        mapOfUploadedFunctionFileNames.put(request.getId(), functionFileName);
+    }
+
+    public void addOrUpdateUploadedJsonFileName(CompilerRequest request, String jsonFileName) {
+        System.out.println("Add Json " + jsonFileName + " - for id: " + request.getId());
+        mapOfUploadedJsonFileNames.put(request.getId(), jsonFileName);
+    }
+
     public CompilerRequest removeRequest(long id) {
         return requests.remove(id);
     }
 
-    public void removeUploadedFileName(long id) {
-        mapOfUploadedFileNames.remove(id);
+    public void removeUploadedFunctionFileName(long id) {
+        mapOfUploadedFunctionFileNames.remove(id);
+    }
+
+    public void removeUploadedJsonFileName(long id) {
+        mapOfUploadedJsonFileNames.remove(id);
     }
 }
