@@ -44,6 +44,14 @@ public class ElegantRequestHandler {
         return requests.get(id);
     }
 
+    public String getFileNameOfAccelerationCode(long id) {
+        CompilerRequest compilerRequest = requests.get(id);
+        String functionName = compilerRequest.getFileInfo().getFunctionName();
+        String suffix = compilerRequest.getFileInfo().getProgrammingLanguage().toLowerCase();
+        String fileName = functionName + "." + suffix;
+        return fileName;
+    }
+
     public String getUploadedFunctionFileName(long id) {
         return mapOfUploadedFunctionFileNames.get(id);
     }
