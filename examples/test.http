@@ -17,7 +17,7 @@ GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/accelerati
 #
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/info
 #
 
 ###
@@ -35,7 +35,7 @@ Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo2.json"
 < ./inputFiles/deviceInfo2.json
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/info
 #
 
 ###
@@ -57,14 +57,18 @@ GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/accelerati
 #
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/retrieve
+#
+
+###
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2/retrieve
 #
 
 ###
 DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/retrieve
 #
 
 ###
