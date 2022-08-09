@@ -36,6 +36,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
 import java.util.List;
 
 @Path("/acceleration/requests")
@@ -60,12 +61,26 @@ public class ElegantAccelerationService {
     }
 
     @GET
-    @Path("/{requestId}")
+    @Path("/{requestId}/info")
     @Produces(MediaType.APPLICATION_JSON)
     public CompilerRequest retrieveRequest(@PathParam("requestId") long requestId) {
         System.out.println("The uploaded functionFileName for request [" + requestId + "] of code is: " + elegantRequestHandler.getUploadedFunctionFileName(requestId));
         System.out.println("The uploaded jsonFileName for request [" + requestId + "] of code is: " + elegantRequestHandler.getUploadedJsonFileName(requestId));
         return elegantRequestHandler.getRequest(requestId);
+    }
+
+    @GET
+    @Path("/{requestId}/retrieve")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadFile(@PathParam("requestId") long requestId) throws Exception {
+        if (elegantRequestHandler.getUploadedFunctionFileName(requestId) != null) {
+            File fileDownload = new File(elegantRequestHandler.getUploadedFunctionFileName(requestId));
+            Response.ResponseBuilder response = Response.ok((Object) fileDownload);
+            response.header("Content-Disposition", "attachment;filename=" + elegantRequestHandler.getFileNameOfAccelerationCode(requestId));
+            return response.build();
+        } else {
+            return Response.status(404).entity("File not found.").build();
+        }
     }
 
     @GET
