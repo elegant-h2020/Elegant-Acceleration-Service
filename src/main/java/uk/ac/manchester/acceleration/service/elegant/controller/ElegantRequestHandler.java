@@ -19,16 +19,19 @@
  */
 package uk.ac.manchester.acceleration.service.elegant.controller;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ElegantRequestHandler {
+    private static final String FILE_GENERATED_PATH = "/home/thanos/repositories/Elegant-Acceleration-Service/examples/generated";
     private Map<Long, CompilerRequest> requests = RequestDatabase.getRequests();
 
     private static ConcurrentHashMap<Long, String> mapOfUploadedFunctionFileNames = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Long, String> mapOfUploadedJsonFileNames = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, String> mapOfGeneratedKernelNames = new ConcurrentHashMap<>();
 
     private static long uid = 0;
 
@@ -46,10 +49,18 @@ public class ElegantRequestHandler {
 
     public String getFileNameOfAccelerationCode(long id) {
         CompilerRequest compilerRequest = requests.get(id);
-        String functionName = compilerRequest.getFileInfo().getFunctionName();
-        String suffix = compilerRequest.getFileInfo().getProgrammingLanguage().toLowerCase();
+        String functionName = compilerRequest.getFileInfo().getFunctionName() + "-" + id;
+        String suffix = "cl";
         String fileName = functionName + "." + suffix;
         return fileName;
+    }
+
+    public String getGeneratedKernelFileName(long id) {
+        return mapOfGeneratedKernelNames.get(id);
+    }
+
+    public void removeKernelFileNameFromMap(long id) {
+        mapOfGeneratedKernelNames.remove(id);
     }
 
     public String getUploadedFunctionFileName(long id) {
@@ -95,5 +106,12 @@ public class ElegantRequestHandler {
 
     public void removeUploadedJsonFileName(long id) {
         mapOfUploadedJsonFileNames.remove(id);
+    }
+
+    // TODO: Update with invocation to the integrated compilers
+    public void compile(TransactionMetaData transactionMetaData) {
+        CompilerRequest compilerRequest = transactionMetaData.getCompilerRequest();
+        mapOfGeneratedKernelNames.put(compilerRequest.getId(), FILE_GENERATED_PATH + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilerRequest().getId()));
+        transactionMetaData.getCompilerRequest().setState(CompilerRequest.CompilationState.SUBMITTED);
     }
 }
