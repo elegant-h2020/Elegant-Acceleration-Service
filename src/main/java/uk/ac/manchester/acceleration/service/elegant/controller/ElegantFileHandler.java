@@ -46,7 +46,7 @@ public class ElegantFileHandler {
 
     private static final String FILE_UPLOAD_PATH = "/home/thanos/repositories/Elegant-Acceleration-Service/examples/uploaded";
 
-    private CompilerRequest parseJsonFileToCompilerRequest(String fileName) {
+    private static CompilationRequest parseJsonFileToCompilationRequest(String fileName) {
         System.out.println("---Parsing DeviceInfo file: " + fileName);
         JSONParser parser = new JSONParser();
         try {
@@ -125,7 +125,7 @@ public class ElegantFileHandler {
             DeviceInfo deviceInfo = new DeviceInfo(deviceName[0], doubleFPSupport[0], maxWorkItems[0], deviceAddressBits[0], deviceType[0], deviceExtensions[0], availableProcessors[0]);
 
             // Compose CompilerRequest
-            CompilerRequest compilerRequest = new CompilerRequest(fileInfo, deviceInfo);
+            CompilationRequest compilerRequest = new CompilationRequest(fileInfo, deviceInfo);
             return compilerRequest;
         } catch (Exception e) {
             e.printStackTrace();
@@ -143,8 +143,8 @@ public class ElegantFileHandler {
         }
     }
 
-    public TransactionMetaData iterateAndParseUploadFilesFromRequest(HttpServletRequest request) {
-        CompilerRequest compilerRequest = null;
+    public static TransactionMetaData iterateAndParseUploadFilesFromRequest(HttpServletRequest request) {
+        CompilationRequest compilationRequest = null;
         int code = 200;
         String msg = "Files uploaded.";
         String functionFileName = null;
@@ -174,7 +174,7 @@ public class ElegantFileHandler {
                             writeInputStreamToFile(stream, file);
                         }
                         if (itemName.contains(".json")) {
-                            compilerRequest = parseJsonFileToCompilerRequest(file.getAbsolutePath());
+                            compilationRequest = parseJsonFileToCompilationRequest(file.getAbsolutePath());
                             jsonFileName = FILE_UPLOAD_PATH + File.separator + itemName;
                         } else if (itemName.contains(".java") || itemName.contains(".cpp") || itemName.contains(".c")) {
                             functionFileName = FILE_UPLOAD_PATH + File.separator + itemName;
@@ -191,11 +191,11 @@ public class ElegantFileHandler {
             code = 404;
             msg = e.getMessage();
         }
-        TransactionMetaData transactionMetaData = new TransactionMetaData(compilerRequest, functionFileName, jsonFileName, Response.status(code).entity(msg).build());
+        TransactionMetaData transactionMetaData = new TransactionMetaData(compilationRequest, functionFileName, jsonFileName, Response.status(code).entity(msg).build());
         return transactionMetaData;
     }
 
-    public void removeFile(String fileName) {
+    public static void removeFile(String fileName) {
         File file = new File(fileName);
         if (file.exists()) {
             file.delete();

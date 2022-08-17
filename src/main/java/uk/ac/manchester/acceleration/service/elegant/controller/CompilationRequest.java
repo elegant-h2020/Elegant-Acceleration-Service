@@ -22,8 +22,8 @@ package uk.ac.manchester.acceleration.service.elegant.controller;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class CompilerRequest {
-    public enum CompilationState {
+public class CompilationRequest {
+    public enum State {
         INITIAL, SUBMITTED, COMPLETED, UNSUPPORTED, FAILED
     }
 
@@ -31,19 +31,23 @@ public class CompilerRequest {
     private FileInfo fileInfo;
     private DeviceInfo deviceInfo;
 
-    private CompilationState state;
+    private State state;
 
-    public CompilerRequest(FileInfo fileInfo, DeviceInfo deviceInfo) {
+    private String sourceCode; // TODO: Save the source code as a String
+
+    private String acceleratedCode; // TODO: Save the acceleratedCode code as a String
+
+    public CompilationRequest(FileInfo fileInfo, DeviceInfo deviceInfo) {
         this.fileInfo = fileInfo;
         this.deviceInfo = deviceInfo;
-        this.state = CompilationState.INITIAL;
+        this.state = State.INITIAL;
     }
 
-    public CompilerRequest(long id, FileInfo fileInfo, DeviceInfo deviceInfo) {
+    public CompilationRequest(long id, FileInfo fileInfo, DeviceInfo deviceInfo) {
         this.id = id;
         this.fileInfo = fileInfo;
         this.deviceInfo = deviceInfo;
-        this.state = CompilationState.INITIAL;
+        this.state = State.INITIAL;
     }
 
     public long getId() {
@@ -58,7 +62,7 @@ public class CompilerRequest {
         return deviceInfo;
     }
 
-    public CompilationState getState() {
+    public State getState() {
         return state;
     }
 
@@ -74,7 +78,7 @@ public class CompilerRequest {
         this.deviceInfo = deviceInfo;
     }
 
-    public void setState(CompilationState state) {
+    public void setState(State state) {
         this.state = state;
     }
 }

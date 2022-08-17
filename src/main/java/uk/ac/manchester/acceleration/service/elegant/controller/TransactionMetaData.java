@@ -22,26 +22,26 @@ package uk.ac.manchester.acceleration.service.elegant.controller;
 import javax.ws.rs.core.Response;
 
 public class TransactionMetaData {
-    private CompilerRequest compilerRequest;
+    private CompilationRequest compilationRequest;
     private String functionFileName;
     private String jsonFileName;
 
     public Response response;
 
-    public TransactionMetaData(CompilerRequest compilerRequest, String functionFileName, String jsonFileName, Response response) {
-        this.compilerRequest = compilerRequest;
+    public TransactionMetaData(CompilationRequest compilationRequest, String functionFileName, String jsonFileName, Response response) {
+        this.compilationRequest = compilationRequest;
 
         this.functionFileName = functionFileName;
         this.jsonFileName = jsonFileName;
         this.response = response;
     }
 
-    public CompilerRequest getCompilerRequest() {
-        return compilerRequest;
+    public CompilationRequest getCompilationRequest() {
+        return compilationRequest;
     }
 
-    public void setCompilerRequest(CompilerRequest compilerRequest) {
-        this.compilerRequest = compilerRequest;
+    public void setCompilationRequest(CompilationRequest compilationRequest) {
+        this.compilationRequest = compilationRequest;
     }
 
     public String getFunctionFileName() {

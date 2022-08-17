@@ -21,7 +21,7 @@ package uk.ac.manchester.acceleration.service.elegant.api;
 
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import uk.ac.manchester.acceleration.service.elegant.controller.ElegantRequestHandler;
-import uk.ac.manchester.acceleration.service.elegant.controller.CompilerRequest;
+import uk.ac.manchester.acceleration.service.elegant.controller.CompilationRequest;
 import uk.ac.manchester.acceleration.service.elegant.controller.ElegantFileHandler;
 import uk.ac.manchester.acceleration.service.elegant.controller.TransactionMetaData;
 
@@ -42,36 +42,33 @@ import java.util.List;
 @Path("/acceleration/requests")
 public class ElegantAccelerationService {
 
-    ElegantRequestHandler elegantRequestHandler = new ElegantRequestHandler();
-    ElegantFileHandler elegantFileHandler = new ElegantFileHandler();
-
     public ElegantAccelerationService() {
 
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<CompilerRequest> retrieveRequests() {
-        return elegantRequestHandler.getAllRequests();
+    public List<CompilationRequest> retrieveRequests() {
+        return ElegantRequestHandler.getAllRequests();
     }
 
     @GET
     @Path("/{requestId}/info")
     @Produces(MediaType.APPLICATION_JSON)
-    public CompilerRequest retrieveRequest(@PathParam("requestId") long requestId) {
-        System.out.println("The generated kernelFileName for request [" + requestId + "] of code is: " + elegantRequestHandler.getGeneratedKernelFileName(requestId));
-        System.out.println("The uploaded jsonFileName for request [" + requestId + "] of code is: " + elegantRequestHandler.getUploadedJsonFileName(requestId));
-        return elegantRequestHandler.getRequest(requestId);
+    public CompilationRequest retrieveRequest(@PathParam("requestId") long requestId) {
+        System.out.println("The generated kernelFileName for request [" + requestId + "] of code is: " + ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+        System.out.println("The uploaded jsonFileName for request [" + requestId + "] of code is: " + ElegantRequestHandler.getUploadedJsonFileName(requestId));
+        return ElegantRequestHandler.getRequest(requestId); // TODO Avoid creating an object. Use the class name and make methods static.
     }
 
     @GET
     @Path("/{requestId}/retrieve")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response downloadFile(@PathParam("requestId") long requestId) throws Exception {
-        if (elegantRequestHandler.getGeneratedKernelFileName(requestId) != null) {
-            File fileDownload = new File(elegantRequestHandler.getGeneratedKernelFileName(requestId));
+        if (ElegantRequestHandler.getGeneratedKernelFileName(requestId) != null) {
+            File fileDownload = new File(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
             Response.ResponseBuilder response = Response.ok((Object) fileDownload);
-            response.header("Content-Disposition", "attachment;filename=" + elegantRequestHandler.getFileNameOfAccelerationCode(requestId));
+            response.header("Content-Disposition", "attachment;filename=" + ElegantRequestHandler.getFileNameOfAccelerationCode(requestId));
             return response.build();
         } else {
             return Response.status(404).entity("File not found.").build();
@@ -81,9 +78,9 @@ public class ElegantAccelerationService {
     @GET
     @Path("/{requestId}/state")
     @Produces(MediaType.APPLICATION_JSON)
-    public CompilerRequest.CompilationState retrieveRequestState(@PathParam("requestId") long requestId) {
-        if (elegantRequestHandler.getRequest(requestId) != null) {
-            return elegantRequestHandler.getRequest(requestId).getState();
+    public CompilationRequest.State retrieveRequestState(@PathParam("requestId") long requestId) {
+        if (ElegantRequestHandler.getRequest(requestId) != null) {
+            return ElegantRequestHandler.getRequest(requestId).getState();
         } else {
             return null;
         }
@@ -93,27 +90,27 @@ public class ElegantAccelerationService {
     @Path("/count")
     @Produces("text/plain")
     public String getCount() {
-        return String.valueOf(elegantRequestHandler.getAllRequests().size()); // kernelMap.size()
+        return String.valueOf(ElegantRequestHandler.getAllRequests().size()); // kernelMap.size()
     }
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/submit")
-    public CompilerRequest uploadFile(@Context HttpServletRequest request) {
+    public CompilationRequest uploadFile(@Context HttpServletRequest request) {
         TransactionMetaData transactionMetaData = null;
         if (ServletFileUpload.isMultipartContent(request)) {
-            transactionMetaData = elegantFileHandler.iterateAndParseUploadFilesFromRequest(request);
-            if (transactionMetaData.getCompilerRequest() != null) {
-                long uid = elegantRequestHandler.getUid();
-                transactionMetaData.getCompilerRequest().setId(uid);
-                elegantRequestHandler.addRequest(transactionMetaData.getCompilerRequest());
-                elegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilerRequest(), transactionMetaData.getFunctionFileName());
-                elegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilerRequest(), transactionMetaData.getJsonFileName());
-                elegantRequestHandler.compile(transactionMetaData);
+            transactionMetaData = ElegantFileHandler.iterateAndParseUploadFilesFromRequest(request);
+            if (transactionMetaData.getCompilationRequest() != null) {
+                long uid = ElegantRequestHandler.getUid();
+                transactionMetaData.getCompilationRequest().setId(uid);
+                ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
+                ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
+                ElegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
+                ElegantRequestHandler.compile(transactionMetaData);
             }
         }
-        return transactionMetaData.getCompilerRequest();
+        return transactionMetaData.getCompilationRequest();
     }
 
     @POST
@@ -122,15 +119,15 @@ public class ElegantAccelerationService {
     public Response updateAndCompile(@PathParam("requestId") long requestId, @Context HttpServletRequest request) {
         TransactionMetaData transactionMetaData = null;
         if (ServletFileUpload.isMultipartContent(request)) {
-            elegantFileHandler.removeFile(elegantRequestHandler.getUploadedFunctionFileName(requestId));
-            elegantRequestHandler.removeKernelFileNameFromMap(requestId);
-            elegantFileHandler.removeFile(elegantRequestHandler.getUploadedJsonFileName(requestId));
-            transactionMetaData = elegantFileHandler.iterateAndParseUploadFilesFromRequest(request);
-            transactionMetaData.getCompilerRequest().setId(requestId);
-            elegantRequestHandler.updateRequest(transactionMetaData.getCompilerRequest());
-            elegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilerRequest(), transactionMetaData.getFunctionFileName());
-            elegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilerRequest(), transactionMetaData.getJsonFileName());
-            elegantRequestHandler.compile(transactionMetaData);
+            ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
+            ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
+            ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedJsonFileName(requestId));
+            transactionMetaData = ElegantFileHandler.iterateAndParseUploadFilesFromRequest(request);
+            transactionMetaData.getCompilationRequest().setId(requestId);
+            ElegantRequestHandler.updateRequest(transactionMetaData.getCompilationRequest());
+            ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
+            ElegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
+            ElegantRequestHandler.compile(transactionMetaData);
         }
         return transactionMetaData.response;
     }
@@ -138,12 +135,12 @@ public class ElegantAccelerationService {
     @DELETE
     @Path("/{requestId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public CompilerRequest delete(@PathParam("requestId") long requestId) {
-        elegantFileHandler.removeFile(elegantRequestHandler.getUploadedFunctionFileName(requestId));
-        elegantRequestHandler.removeKernelFileNameFromMap(requestId);
-        elegantFileHandler.removeFile(elegantRequestHandler.getUploadedJsonFileName(requestId));
-        elegantRequestHandler.removeUploadedFunctionFileName(requestId);
-        elegantRequestHandler.removeUploadedJsonFileName(requestId);
-        return elegantRequestHandler.removeRequest(requestId);
+    public CompilationRequest delete(@PathParam("requestId") long requestId) {
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
+        ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedJsonFileName(requestId));
+        ElegantRequestHandler.removeUploadedFunctionFileName(requestId);
+        ElegantRequestHandler.removeUploadedJsonFileName(requestId);
+        return ElegantRequestHandler.removeRequest(requestId);
     }
 }

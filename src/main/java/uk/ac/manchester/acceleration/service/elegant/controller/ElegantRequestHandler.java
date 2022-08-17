@@ -24,61 +24,64 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
+//TODO Make methods static
 public class ElegantRequestHandler {
     private static final String FILE_GENERATED_PATH = "/home/thanos/repositories/Elegant-Acceleration-Service/examples/generated";
-    private Map<Long, CompilerRequest> requests = RequestDatabase.getRequests();
+    private static Map<Long, CompilationRequest> requests = RequestDatabase.getRequests(); // TODO Connect with a database Spring MySQL, or other database, SQLLite
 
+    // TODO Remove hashmaps and update the database functionality
     private static ConcurrentHashMap<Long, String> mapOfUploadedFunctionFileNames = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Long, String> mapOfUploadedJsonFileNames = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Long, String> mapOfGeneratedKernelNames = new ConcurrentHashMap<>();
 
-    private static long uid = 0;
+    private static AtomicLong uid = new AtomicLong(0);
 
-    public long getUid() {
-        return ++uid;
+    public static long getUid() { // TODO GenerateID
+        return uid.incrementAndGet();
     }
 
-    public List<CompilerRequest> getAllRequests() {
-        return new ArrayList<CompilerRequest>(requests.values());
+    public static List<CompilationRequest> getAllRequests() {
+        return new ArrayList<CompilationRequest>(requests.values());
     }
 
-    public CompilerRequest getRequest(long id) {
+    public static CompilationRequest getRequest(long id) {
         return requests.get(id);
     }
 
-    public String getFileNameOfAccelerationCode(long id) {
-        CompilerRequest compilerRequest = requests.get(id);
+    public static String getFileNameOfAccelerationCode(long id) {
+        CompilationRequest compilerRequest = requests.get(id);
         String functionName = compilerRequest.getFileInfo().getFunctionName() + "-" + id;
         String suffix = "cl";
         String fileName = functionName + "." + suffix;
         return fileName;
     }
 
-    public String getGeneratedKernelFileName(long id) {
+    public static String getGeneratedKernelFileName(long id) {
         return mapOfGeneratedKernelNames.get(id);
     }
 
-    public void removeKernelFileNameFromMap(long id) {
+    public static void removeKernelFileNameFromMap(long id) {
         mapOfGeneratedKernelNames.remove(id);
     }
 
-    public String getUploadedFunctionFileName(long id) {
+    public static String getUploadedFunctionFileName(long id) {
         return mapOfUploadedFunctionFileNames.get(id);
     }
 
-    public String getUploadedJsonFileName(long id) {
+    public static String getUploadedJsonFileName(long id) {
         return mapOfUploadedJsonFileNames.get(id);
     }
 
-    public CompilerRequest addRequest(CompilerRequest request) {
-        request.setState(CompilerRequest.CompilationState.INITIAL);
+    public static CompilationRequest addRequest(CompilationRequest request) {
+        request.setState(CompilationRequest.State.INITIAL);
         requests.put(request.getId(), request);
 
         return request;
     }
 
-    public CompilerRequest updateRequest(CompilerRequest request) {
+    public static CompilationRequest updateRequest(CompilationRequest request) {
         if (request.getId() <= 0) {
             return null;
         }
@@ -86,32 +89,32 @@ public class ElegantRequestHandler {
         return request;
     }
 
-    public void addOrUpdateUploadedFunctionFileName(CompilerRequest request, String functionFileName) {
+    public static void addOrUpdateUploadedFunctionFileName(CompilationRequest request, String functionFileName) {
         System.out.println("Add " + functionFileName + " - for id: " + request.getId());
         mapOfUploadedFunctionFileNames.put(request.getId(), functionFileName);
     }
 
-    public void addOrUpdateUploadedJsonFileName(CompilerRequest request, String jsonFileName) {
+    public static void addOrUpdateUploadedJsonFileName(CompilationRequest request, String jsonFileName) {
         System.out.println("Add Json " + jsonFileName + " - for id: " + request.getId());
         mapOfUploadedJsonFileNames.put(request.getId(), jsonFileName);
     }
 
-    public CompilerRequest removeRequest(long id) {
+    public static CompilationRequest removeRequest(long id) {
         return requests.remove(id);
     }
 
-    public void removeUploadedFunctionFileName(long id) {
+    public static void removeUploadedFunctionFileName(long id) {
         mapOfUploadedFunctionFileNames.remove(id);
     }
 
-    public void removeUploadedJsonFileName(long id) {
+    public static void removeUploadedJsonFileName(long id) {
         mapOfUploadedJsonFileNames.remove(id);
     }
 
     // TODO: Update with invocation to the integrated compilers
-    public void compile(TransactionMetaData transactionMetaData) {
-        CompilerRequest compilerRequest = transactionMetaData.getCompilerRequest();
-        mapOfGeneratedKernelNames.put(compilerRequest.getId(), FILE_GENERATED_PATH + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilerRequest().getId()));
-        transactionMetaData.getCompilerRequest().setState(CompilerRequest.CompilationState.SUBMITTED);
+    public static void compile(TransactionMetaData transactionMetaData) {
+        CompilationRequest compilerRequest = transactionMetaData.getCompilationRequest();
+        mapOfGeneratedKernelNames.put(compilerRequest.getId(), FILE_GENERATED_PATH + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
+        transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.SUBMITTED);
     }
 }
