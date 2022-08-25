@@ -38,7 +38,7 @@ public class ElegantRequestHandler {
 
     private static AtomicLong uid = new AtomicLong(0);
 
-    public static long getUid() { // TODO GenerateID
+    public static long incrementAndGetUid() {
         return uid.incrementAndGet();
     }
 

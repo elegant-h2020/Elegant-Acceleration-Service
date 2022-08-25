@@ -102,7 +102,7 @@ public class ElegantAccelerationService {
         if (ServletFileUpload.isMultipartContent(request)) {
             transactionMetaData = ElegantFileHandler.iterateAndParseUploadFilesFromRequest(request);
             if (transactionMetaData.getCompilationRequest() != null) {
-                long uid = ElegantRequestHandler.getUid();
+                long uid = ElegantRequestHandler.incrementAndGetUid();
                 transactionMetaData.getCompilationRequest().setId(uid);
                 ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
                 ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
