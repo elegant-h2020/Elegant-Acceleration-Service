@@ -1,0 +1,19 @@
+{
+  "fileInfo": {
+    "functionName": "vectorAdd",
+    "programmingLanguage": "C++"
+  },
+  "deviceInfo": {
+    "deviceName": "Nvidia GPU 1",
+    "doubleFPSupport": true,
+    "maxWorkItems": {
+      "dim1": 32,
+      "dim2": 1,
+      "dim3": 1
+    },
+    "deviceAddressBits": 64,
+    "deviceType": "CL_DEVICE_TYPE_GPU",
+    "deviceExtensions": "cl_khr_int64_base_atomics",
+    "availableProcessors": 1024
+  }
+}

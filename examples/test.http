@@ -1,137 +1,74 @@
 ###
+POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/submit
+Accept: multipart/form-data
+Content-Type: multipart/form-data; boundary=abcd
+
+--abcd
+Content-Disposition: form-data; name="vectorAdd"; filename="vectorAdd.java"
+
+< ./inputFiles/vectorAdd.java
+--abcd
+Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo.json"
+
+< ./inputFiles/deviceInfo.json
+
+###
 GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/count
 #
 
 ###
-POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
-Accept: application/json
-Content-Type: application/json
-
-{
-  "fileInfo": {
-    "functionName": "foo0",
-    "programmingLanguage": "Java"
-  },
-  "deviceInfo": {
-    "deviceName" : "Nvidia GPU",
-    "doubleFPSupport" : true,
-
-    "deviceAddressBits" : 64,
-    "deviceType" : "CL_DEVICE_TYPE_GPU",
-    "deviceExtensions" : "cl_khr_int64_base_atomics",
-    "availableProcessors" : 2048
-  }
-}
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/info
+#
 
 ###
-POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
-Accept: application/json
-Content-Type: application/json
+POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/resubmit
+Accept: multipart/form-data
+Content-Type: multipart/form-data; boundary=abcd
 
-{
-  "fileInfo": {
-    "functionName": "foo1",
-    "programmingLanguage": "C++"
-  },
-  "deviceInfo": {
-    "deviceName" : "Nvidia GPU 1",
-    "doubleFPSupport" : true,
+--abcd
+Content-Disposition: form-data; name="vectorAdd"; filename="vectorAdd.cpp"
 
-    "deviceAddressBits" : 64,
-    "deviceType" : "CL_DEVICE_TYPE_GPU",
-    "deviceExtensions" : "cl_khr_int64_base_atomics",
-    "availableProcessors" : 1024
-  }
-}
+< ./inputFiles/vectorAdd.cpp
+--abcd
+Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo2.json"
+
+< ./inputFiles/deviceInfo2.json
 
 ###
-POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
-Accept: application/json
-Content-Type: application/json
-
-{
-  "fileInfo": {
-    "functionName": "foo2",
-    "programmingLanguage": "Java"
-  },
-  "deviceInfo": {
-    "deviceName" : "Nvidia GPU 2",
-    "doubleFPSupport" : false,
-    "maxWorkItems": {
-      "dim1" : 16,
-      "dim2" : 1,
-      "dim3" : 1
-    },
-    "deviceAddressBits" : 12,
-    "deviceType" : "CL_DEVICE_TYPE_GPU",
-    "deviceExtensions" : "cl_khr_int64_base_atomics",
-    "availableProcessors" : 1024
-  }
-}
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/info
+#
 
 ###
-POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
-Accept: application/json
-Content-Type: application/json
+POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/submit
+Accept: multipart/form-data
+Content-Type: multipart/form-data; boundary=abcd
 
-{
-  "fileInfo": {
-    "functionName": "foo3",
-    "programmingLanguage": "C"
-  },
-  "deviceInfo": {
-    "deviceName" : "Nvidia GPU 3",
-    "doubleFPSupport" : true,
-    "maxWorkItems": {
-      "dim1" : 1,
-      "dim2" : 1,
-      "dim3" : 1
-    },
-    "deviceAddressBits" : 32,
-    "deviceType" : "CL_DEVICE_TYPE_GPU",
-    "deviceExtensions" : "cl_khr_int64_base_atomics",
-    "availableProcessors" : 1024
-  }
-}
+--abcd
+Content-Disposition: form-data; name="vectorAdd"; filename="vectorAdd.java"
+
+< ./inputFiles/vectorAdd.java
+--abcd
+Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo.json"
+
+< ./inputFiles/deviceInfo.json
 
 ###
 GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
 #
 
 ###
-PUT http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
-Accept: application/json
-Content-Type: application/json
-
-{
-  "fileInfo": {
-    "functionName": "foo2New",
-    "programmingLanguage": "C"
-  },
-  "deviceInfo": {
-    "deviceName" : "Nvidia GPU 10",
-    "doubleFPSupport" : true,
-    "maxWorkItems": {
-      "dim1" : 1024,
-      "dim2" : 64,
-      "dim3" : 1
-    },
-    "deviceAddressBits" : 64,
-    "deviceType" : "CL_DEVICE_TYPE_GPU",
-    "deviceExtensions" : "cl_khr_int64_base_atomics",
-    "availableProcessors" : 65536
-  }
-}
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/retrieve
+#
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2/retrieve
 #
 
 ###
 DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/retrieve
 #
 
 ###
@@ -139,5 +76,23 @@ GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/accelerati
 #
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/3/state
+POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/resubmit
+Accept: multipart/form-data
+Content-Type: multipart/form-data; boundary=abcd
+
+--abcd
+Content-Disposition: form-data; name="vectorAdd"; filename="vectorAdd.java"
+
+< ./inputFiles/vectorAdd.java
+--abcd
+Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo.json"
+
+< ./inputFiles/deviceInfo.json
+
+###
+DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1
+#
+
+###
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/count
 #

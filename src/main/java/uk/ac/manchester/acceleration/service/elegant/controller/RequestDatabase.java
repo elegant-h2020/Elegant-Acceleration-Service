@@ -23,10 +23,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RequestDatabase {
-    //TODO: investigate concurrency issues
-    private static ConcurrentHashMap<Long, CompilerRequest> requests = new ConcurrentHashMap<>();
+    // TODO: investigate concurrency issues
+    private static ConcurrentHashMap<Long, CompilationRequest> requests = new ConcurrentHashMap<>();
 
-    public static Map<Long, CompilerRequest> getRequests() {
+    public static Map<Long, CompilationRequest> getRequests() {
         return requests;
     }
 }
