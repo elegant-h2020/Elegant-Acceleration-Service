@@ -29,7 +29,7 @@ mvn clean install
 a) Download GlassFish 5.1.0:
 
 ```bash
-$ wget https://www.eclipse.org/downloads/download.php?file=/glassfish/glassfish-5.1.0.zip
+$ wget 'https://www.eclipse.org/downloads/download.php?file=/glassfish/glassfish-5.1.0.zip&r=1' -O glassfish-5.1.0.zip
 $ unzip glassfish-5.1.0.zip
 $ cd glassfish5
 $ echo "AS_JAVA=<path-to-JDK8>" >> ./glassfish/config/asenv.conf
