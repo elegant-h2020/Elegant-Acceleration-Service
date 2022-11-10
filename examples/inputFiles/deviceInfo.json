@@ -3,6 +3,11 @@
     "functionName": "vectorAdd",
     "programmingLanguage": "Java"
   },
+  "parameters": {
+    "a": "1024",
+    "b": "1024",
+    "c": "1024"
+  },
   "deviceInfo": {
     "deviceName": "Nvidia GPU",
     "doubleFPSupport": true,
