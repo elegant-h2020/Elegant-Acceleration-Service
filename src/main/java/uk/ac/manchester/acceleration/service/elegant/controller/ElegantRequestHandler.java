@@ -19,7 +19,10 @@
  */
 package uk.ac.manchester.acceleration.service.elegant.controller;
 
+import uk.ac.manchester.acceleration.service.elegant.tools.LinuxTornadoVM;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +31,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 //TODO Make methods static
 public class ElegantRequestHandler {
-    private static final String FILE_GENERATED_PATH = "/home/thanos/repositories/Elegant-Acceleration-Service/examples/generated";
+
+    private static String fileGeneratedPath;
     private static Map<Long, CompilationRequest> requests = RequestDatabase.getRequests(); // TODO Connect with a database Spring MySQL, or other database, SQLLite
 
     // TODO Remove hashmaps and update the database functionality
@@ -40,6 +44,14 @@ public class ElegantRequestHandler {
 
     public static long incrementAndGetUid() {
         return uid.incrementAndGet();
+    }
+
+    public String getFileGeneratedPath() {
+        return ElegantRequestHandler.fileGeneratedPath;
+    }
+
+    public static void setFileGeneratedPath(String fileGeneratedPath) {
+        ElegantRequestHandler.fileGeneratedPath = fileGeneratedPath;
     }
 
     public static List<CompilationRequest> getAllRequests() {
@@ -112,9 +124,12 @@ public class ElegantRequestHandler {
     }
 
     // TODO: Update with invocation to the integrated compilers
-    public static void compile(TransactionMetaData transactionMetaData) {
+    public static void compile(LinuxTornadoVM tornadoVM, TransactionMetaData transactionMetaData) throws IOException, InterruptedException {
         CompilationRequest compilerRequest = transactionMetaData.getCompilationRequest();
-        mapOfGeneratedKernelNames.put(compilerRequest.getId(), FILE_GENERATED_PATH + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
+        mapOfGeneratedKernelNames.put(compilerRequest.getId(), fileGeneratedPath + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
+        System.out.println("[compile] method in file: " + mapOfUploadedFunctionFileNames.get(compilerRequest.getId()));
+        tornadoVM.compile(mapOfUploadedFunctionFileNames.get(compilerRequest.getId()), mapOfUploadedJsonFileNames.get(compilerRequest.getId()), mapOfGeneratedKernelNames.get(compilerRequest.getId()));
+        int exitCode = tornadoVM.waitFor();
         transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.SUBMITTED);
     }
 }

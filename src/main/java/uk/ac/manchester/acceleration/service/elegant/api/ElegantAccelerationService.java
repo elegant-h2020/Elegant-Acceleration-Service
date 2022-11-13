@@ -23,7 +23,10 @@ import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import uk.ac.manchester.acceleration.service.elegant.controller.ElegantRequestHandler;
 import uk.ac.manchester.acceleration.service.elegant.controller.CompilationRequest;
 import uk.ac.manchester.acceleration.service.elegant.controller.ElegantFileHandler;
+import uk.ac.manchester.acceleration.service.elegant.controller.EnvironmentVariables;
 import uk.ac.manchester.acceleration.service.elegant.controller.TransactionMetaData;
+import uk.ac.manchester.acceleration.service.elegant.tools.LinuxTornadoVM;
+import uk.ac.manchester.acceleration.service.elegant.tools.TornadoVMInterface;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -37,13 +40,28 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @Path("/acceleration/requests")
 public class ElegantAccelerationService {
 
-    public ElegantAccelerationService() {
+    private static LinuxTornadoVM tornadoVM;
 
+    private static final String OS = System.getProperty("os.name").toLowerCase();
+
+    public ElegantAccelerationService() throws IOException {
+        newTornadoVMInstance();
+        // tornadoVM.buildTornadoVM();
+    }
+
+    private void newTornadoVMInstance() {
+        if (OS.contains("linux")) {
+            tornadoVM = new LinuxTornadoVM();
+            ElegantRequestHandler.setFileGeneratedPath(tornadoVM.getEnvironmentVariable(EnvironmentVariables.GENERATED_KERNELS_DIR));
+        } else {
+            throw new UnsupportedOperationException("The Acceleration Service is not supported for " + OS + ".");
+        }
     }
 
     @GET
@@ -97,7 +115,7 @@ public class ElegantAccelerationService {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/submit")
-    public CompilationRequest uploadFile(@Context HttpServletRequest request) {
+    public CompilationRequest uploadFile(@Context HttpServletRequest request) throws IOException, InterruptedException {
         TransactionMetaData transactionMetaData = null;
         if (ServletFileUpload.isMultipartContent(request)) {
             transactionMetaData = ElegantFileHandler.iterateAndParseUploadFilesFromRequest(request);
@@ -107,7 +125,7 @@ public class ElegantAccelerationService {
                 ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
                 ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
                 ElegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
-                ElegantRequestHandler.compile(transactionMetaData);
+                ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
             }
         }
         return transactionMetaData.getCompilationRequest();
@@ -116,7 +134,7 @@ public class ElegantAccelerationService {
     @POST
     @Path("/{requestId}/resubmit")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response updateAndCompile(@PathParam("requestId") long requestId, @Context HttpServletRequest request) {
+    public Response updateAndCompile(@PathParam("requestId") long requestId, @Context HttpServletRequest request) throws IOException, InterruptedException {
         TransactionMetaData transactionMetaData = null;
         if (ServletFileUpload.isMultipartContent(request)) {
             ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
@@ -127,7 +145,7 @@ public class ElegantAccelerationService {
             ElegantRequestHandler.updateRequest(transactionMetaData.getCompilationRequest());
             ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
             ElegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
-            ElegantRequestHandler.compile(transactionMetaData);
+            ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
         }
         return transactionMetaData.response;
     }
