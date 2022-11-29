@@ -115,7 +115,7 @@ public class ElegantAccelerationService {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/submit")
-    public CompilationRequest uploadFile(@Context HttpServletRequest request) throws IOException, InterruptedException {
+    public Response uploadFile(@Context HttpServletRequest request) throws IOException, InterruptedException {
         TransactionMetaData transactionMetaData = null;
         if (ServletFileUpload.isMultipartContent(request)) {
             transactionMetaData = ElegantFileHandler.iterateAndParseUploadFilesFromRequest(request);
@@ -128,7 +128,7 @@ public class ElegantAccelerationService {
                 ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
             }
         }
-        return transactionMetaData.getCompilationRequest();
+        return transactionMetaData.response;
     }
 
     @POST
