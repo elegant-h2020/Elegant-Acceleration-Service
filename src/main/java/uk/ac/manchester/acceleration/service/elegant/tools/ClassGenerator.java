@@ -69,6 +69,13 @@ public class ClassGenerator {
         return subStrings[subStrings.length - 1];
     }
 
+    public static String getMethodNameFromFileName(String methodFileName) {
+        String signatureName = getSignatureOfMethodFile(methodFileName);
+        String[] strings = signatureName.split("\\(");
+        String[] subStrings = strings[0].split(" ");
+        return subStrings[subStrings.length - 1];
+    }
+
     private static String extractSignature(String line) {
         return line.replaceFirst(" \\{|\\{", ";");
     }

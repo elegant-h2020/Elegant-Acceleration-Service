@@ -133,9 +133,10 @@ public class ElegantRequestHandler {
         String methodFileName = mapOfUploadedFunctionFileNames.get(compilerRequest.getId());
         String deviceDescriptionJsonFileName = mapOfUploadedJsonFileNames.get(compilerRequest.getId());
         String generatedKernelFileName = mapOfGeneratedKernelNames.get(compilerRequest.getId());
-        tornadoVM.compile(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, generatedKernelFileName);
+        tornadoVM.compileToBytecode(compilerRequest.getId(), methodFileName);
 
-        int exitCode = tornadoVM.waitFor();
+        tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, generatedKernelFileName);
+
         transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.SUBMITTED);
         transactionMetaData.response = Response//
                 .status(Response.Status.ACCEPTED)//

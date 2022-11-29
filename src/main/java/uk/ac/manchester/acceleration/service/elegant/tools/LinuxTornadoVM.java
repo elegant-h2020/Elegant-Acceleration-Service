@@ -4,6 +4,7 @@ import uk.ac.manchester.acceleration.service.elegant.controller.EnvironmentVaria
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 public class LinuxTornadoVM implements TornadoVMInterface {
@@ -47,31 +48,43 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         args.add("-cp");
         args.add(environment.get(EnvironmentVariables.TORNADOVM_DIR) + "/dist/tornado-sdk/tornado-sdk-0.15-dev-afef0d5/share/java/tornado/tornado-api-0.15-dev.jar");
         args.add("-g:vars");
-        args.add(environment.get(EnvironmentVariables.SERVICE_DIR) + "/examples/boilerplate/" + ClassGenerator.getVirtualClassFileName(methodFileName, id));
+        args.add(environment.get(EnvironmentVariables.BOILERPLATE_DIR) + ClassGenerator.getVirtualClassFileName(methodFileName, id));
         return args.toArray(new String[args.size()]);
     }
 
-    private String getCommandForVirtualCompilation(String deviceDescriptionJsonFileName, String generatedKernelFileName, String virtualClassName) {
-        StringBuilder boilerPlateCommand = new StringBuilder();
-        boilerPlateCommand.append(environment.get(EnvironmentVariables.TORNADO_SDK));
-        boilerPlateCommand.append("/bin/");
-        boilerPlateCommand.append("tornado --jvm=\"-Dtornado.device.desc=");
-        boilerPlateCommand.append("/home/thanos/repositories/Elegant-Acceleration-Service/examples/uploaded/virtual-device-GPU.json");
-        // boilerPlateCommand.append(deviceDescriptionJsonFileName);// FIXME:
-        // Parameterize Class name
-        boilerPlateCommand.append(" -Dtornado.virtual.device=True -Dtornado.cim.mode=True -Dtornado.print.kernel=True -Dtornado.print.kernel.dir=");
-        boilerPlateCommand.append(generatedKernelFileName);
-        boilerPlateCommand.append("\" ");
-        boilerPlateCommand.append("-m tornado.examples/uk.ac.manchester.tornado.examples.virtual.");
-        boilerPlateCommand.append(virtualClassName);
-        return boilerPlateCommand.toString();
+    private String[] getCommandForVirtualCompilation(long id, String methodFileName, String deviceDescriptionJsonFileName, String generatedKernelFileName) {
+        ArrayList<String> args = new ArrayList<>();
+        args.add(environment.get(EnvironmentVariables.TORNADO_SDK) + "/bin/tornado");
+        args.add("-cp");
+        args.add(":" + environment.get(EnvironmentVariables.BOILERPLATE_DIR));
+        args.add("--jvm=\"-Dtornado.input.classfile.dir=" + environment.get(EnvironmentVariables.BOILERPLATE_DIR) + ClassGenerator.getVirtualClassName(methodFileName, id) + ".class");
+        args.add("-Dtornado.device.desc=" + deviceDescriptionJsonFileName);
+        args.add("-Dtornado.virtual.device=True");
+        args.add("-Dtornado.cim.mode=True");
+        args.add("-Dtornado.print.kernel=True");
+        args.add("-Dtornado.print.kernel.dir=" + generatedKernelFileName);
+        args.add("\"");
+        args.add("uk.ac.manchester.tornado.drivers.opencl.service.frontend.TestFrontEnd");
+        args.add("--params");
+        args.add(ClassGenerator.getMethodNameFromFileName(methodFileName));
+        return args.toArray(new String[args.size()]);
     }
 
-    public void compile(long id, String methodFileName, String deviceDescriptionJsonFileName, String generatedKernelFileName) throws IOException, InterruptedException {
+    public void compileToBytecode(long id, String methodFileName) throws IOException, InterruptedException {
         String classBody = ClassGenerator.generateBoilerplateCode(methodFileName, id);
         ClassGenerator.writeClassToFile(classBody, environment.get(EnvironmentVariables.BOILERPLATE_DIR) + ClassGenerator.getVirtualClassFileName(methodFileName, id));
         tornadoVMProcessBuilder.command(getCommandForCompileToBytecode(methodFileName, id));
         this.tornadoVMProcess = tornadoVMProcessBuilder.start();
+        int exitCode = waitFor();
+
+    }
+
+    public void compileBytecodeToOpenCL(long id, String methodFileName, String deviceDescriptionJsonFileName, String generatedKernelFileName) throws IOException, InterruptedException {
+        System.out.println("Command for virtual compilation:" + Arrays.toString(getCommandForVirtualCompilation(id, methodFileName, deviceDescriptionJsonFileName, generatedKernelFileName)));
+        tornadoVMProcessBuilder.command(getCommandForVirtualCompilation(id, methodFileName, deviceDescriptionJsonFileName, generatedKernelFileName));
+        this.tornadoVMProcess = tornadoVMProcessBuilder.start();
+        int exitCode = waitFor();
+
     }
 
     public int waitFor() throws InterruptedException {
