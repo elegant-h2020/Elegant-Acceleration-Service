@@ -25,6 +25,7 @@ import org.apache.tomcat.util.http.fileupload.FileItemStream;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -35,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
 
 public class ElegantFileHandler {
@@ -56,6 +58,7 @@ public class ElegantFileHandler {
             final String[] programmingLanguage = new String[1];
             final String[] deviceName = new String[1];
             final boolean[] doubleFPSupport = new boolean[1];
+            final long[] maxWorkItemSizes = new long[3];
             final int[] deviceAddressBits = new int[1];
             final String[] deviceType = new String[1];
             final String[] deviceExtensions = new String[1];
@@ -78,7 +81,6 @@ public class ElegantFileHandler {
             FileInfo fileInfo = new FileInfo(functionName[0], programmingLanguage[0]);
 
             // Reconstruct DeviceInfo
-            final MaxWorkItems[] maxWorkItems = { new MaxWorkItems() };
             Map<Object, Object> deviceInfoMap = (Map<Object, Object>) (jsonObject.get("deviceInfo"));
             deviceInfoMap.forEach((key, value) -> {
                 switch ((String) key) {
@@ -88,23 +90,10 @@ public class ElegantFileHandler {
                     case "doubleFPSupport":
                         doubleFPSupport[0] = (boolean) value;
                         break;
-                    case "maxWorkItems":
-                        Map<Object, Object> maxWorkItemsMap = (Map<Object, Object>) ((JSONObject) value);
-                        maxWorkItemsMap.forEach((keyMaxWorkItems, valueMaxWorkItems) -> {
-                            switch ((String) keyMaxWorkItems) {
-                                case "dim1":
-                                    maxWorkItems[0].setDim1(((Long) valueMaxWorkItems).intValue());
-                                    break;
-                                case "dim2":
-                                    maxWorkItems[0].setDim2(((Long) valueMaxWorkItems).intValue());
-                                    break;
-                                case "dim3":
-                                    maxWorkItems[0].setDim3(((Long) valueMaxWorkItems).intValue());
-                                    break;
-                                default:
-                                    break;
-                            }
-                        });
+                    case "maxWorkItemSizes":
+                        for (int i = 0; i < maxWorkItemSizes.length; i++) {
+                            maxWorkItemSizes[i] = (long) ((JSONArray) value).get(i);
+                        }
                         break;
                     case "deviceAddressBits":
                         deviceAddressBits[0] = ((Long) value).intValue();
@@ -122,7 +111,7 @@ public class ElegantFileHandler {
                         break;
                 }
             });
-            DeviceInfo deviceInfo = new DeviceInfo(deviceName[0], doubleFPSupport[0], maxWorkItems[0], deviceAddressBits[0], deviceType[0], deviceExtensions[0], availableProcessors[0]);
+            DeviceInfo deviceInfo = new DeviceInfo(deviceName[0], doubleFPSupport[0], maxWorkItemSizes, deviceAddressBits[0], deviceType[0], deviceExtensions[0], availableProcessors[0]);
 
             // Compose CompilerRequest
             CompilationRequest compilerRequest = new CompilationRequest(fileInfo, deviceInfo);

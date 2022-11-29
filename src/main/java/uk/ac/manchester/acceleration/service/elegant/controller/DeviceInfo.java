@@ -22,7 +22,7 @@ package uk.ac.manchester.acceleration.service.elegant.controller;
 public class DeviceInfo {
     private String deviceName;
     private boolean doubleFPSupport;
-    private MaxWorkItems maxWorkItems;
+    private long[] maxWorkItemSizes;
     private int deviceAddressBits;
     private String deviceType;
     private String deviceExtensions;
@@ -31,10 +31,10 @@ public class DeviceInfo {
     public DeviceInfo() {
     }
 
-    public DeviceInfo(String deviceName, boolean doubleFPSupport, MaxWorkItems maxWorkItems, int deviceAddressBits, String deviceType, String deviceExtensions, int availableProcessors) {
+    public DeviceInfo(String deviceName, boolean doubleFPSupport, long[] maxWorkItemSizes, int deviceAddressBits, String deviceType, String deviceExtensions, int availableProcessors) {
         this.deviceName = deviceName;
         this.doubleFPSupport = doubleFPSupport;
-        this.maxWorkItems = maxWorkItems;
+        this.maxWorkItemSizes = maxWorkItemSizes;
         this.deviceAddressBits = deviceAddressBits;
         this.deviceType = deviceType;
         this.deviceExtensions = deviceExtensions;
@@ -49,8 +49,8 @@ public class DeviceInfo {
         return doubleFPSupport;
     }
 
-    public MaxWorkItems getMaxWorkItems() {
-        return maxWorkItems;
+    public long[] getMaxWorkItemSizes() {
+        return maxWorkItemSizes;
     }
 
     public int getDeviceAddressBits() {
@@ -77,8 +77,8 @@ public class DeviceInfo {
         this.doubleFPSupport = doubleFPSupport;
     }
 
-    public void setMaxWorkItems(MaxWorkItems maxWorkItems) {
-        this.maxWorkItems = maxWorkItems;
+    public void setMaxWorkItemSizes(long[] maxWorkItemSizes) {
+        this.maxWorkItemSizes = maxWorkItemSizes;
     }
 
     public void setDeviceAddressBits(int deviceAddressBits) {
