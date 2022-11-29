@@ -36,6 +36,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -128,6 +132,38 @@ public class ElegantFileHandler {
             byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
             while ((read = inputStream.read(bytes)) != -1) {
                 outputStream.write(bytes, 0, read);
+            }
+        }
+    }
+
+    public static void cleanUploadedFiles(TransactionMetaData transactionMetaData) {
+        String sourceJsonFileName = transactionMetaData.getJsonFileName();
+        String sourceFunctionFileName = transactionMetaData.getFunctionFileName();
+        String targetJsonFileName = null;
+        String targetFunctionFileName = null;
+        long id = transactionMetaData.getCompilationRequest().getId();
+
+        File idDirectory = new File(FILE_UPLOAD_PATH + File.separator + id);
+        if (!idDirectory.exists()) {
+            idDirectory.mkdirs();
+            int jsonSubstringLength = sourceJsonFileName.split("\\/").length;
+            targetJsonFileName = idDirectory.getAbsolutePath() + File.separator + sourceJsonFileName.split("\\/")[jsonSubstringLength - 1];
+
+            int functionSubstringLength = sourceFunctionFileName.split("\\/").length;
+            targetFunctionFileName = idDirectory.getAbsolutePath() + File.separator + sourceFunctionFileName.split("\\/")[functionSubstringLength - 1];
+
+            Path sourceJsonPath = Paths.get(sourceJsonFileName);
+            Path targetJsonPath = Paths.get(targetJsonFileName);
+            Path sourceFunctionPath = Paths.get(sourceFunctionFileName);
+            Path targetFunctionPath = Paths.get(targetFunctionFileName);
+
+            try {
+                Files.move(sourceJsonPath, targetJsonPath, StandardCopyOption.REPLACE_EXISTING);
+                Files.move(sourceFunctionPath, targetFunctionPath, StandardCopyOption.REPLACE_EXISTING);
+                transactionMetaData.setJsonFileName(targetJsonFileName);
+                transactionMetaData.setFunctionFileName(targetFunctionFileName);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

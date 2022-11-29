@@ -97,23 +97,23 @@ public class ClassGenerator {
         }
     }
 
-    public static String getVirtualClassName(String methodFileName, long id) {
+    public static String getVirtualClassName(String methodFileName) {
         System.out.println("methodFileName: " + methodFileName);
         String methodName = getMethodNameFromSignature(getSignatureOfMethodFile(methodFileName));
         System.out.println("methodName: " + methodName);
-        String className = "Test" + methodName.substring(0, 1).toUpperCase() + methodName.substring(1) + id;
+        String className = "Test" + methodName.substring(0, 1).toUpperCase() + methodName.substring(1);
         return className;
     }
 
-    public static String getVirtualClassFileName(String methodFileName, long id) {
-        String className = getVirtualClassName(methodFileName, id);
+    public static String getVirtualClassFileName(String methodFileName) {
+        String className = getVirtualClassName(methodFileName);
         return className + SUFFIX;
     }
 
-    public static String generateBoilerplateCode(String methodFileName, long id) {
+    public static String generateBoilerplateCode(String methodFileName) {
         stringBuilder = new StringBuilder();
         emitPackagePrologue(stringBuilder);
-        String className = getVirtualClassName(methodFileName, id);
+        String className = getVirtualClassName(methodFileName);
         emitClassBegin(stringBuilder, className);
         String methodBody = extractMethodFromFileToString(methodFileName);
         emitMethod(stringBuilder, methodBody);

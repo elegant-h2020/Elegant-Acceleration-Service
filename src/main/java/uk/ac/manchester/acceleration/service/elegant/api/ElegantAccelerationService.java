@@ -122,6 +122,7 @@ public class ElegantAccelerationService {
             if (transactionMetaData.getCompilationRequest() != null) {
                 long uid = ElegantRequestHandler.incrementAndGetUid();
                 transactionMetaData.getCompilationRequest().setId(uid);
+                ElegantFileHandler.cleanUploadedFiles(transactionMetaData);
                 ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
                 ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
                 ElegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());

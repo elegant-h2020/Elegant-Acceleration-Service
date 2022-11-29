@@ -66,7 +66,7 @@ public class ElegantRequestHandler {
 
     public static String getFileNameOfAccelerationCode(long id) {
         CompilationRequest compilerRequest = requests.get(id);
-        String functionName = compilerRequest.getFileInfo().getFunctionName() + "-" + id;
+        String functionName = compilerRequest.getFileInfo().getFunctionName();
         String suffix = "cl";
         String fileName = functionName + "." + suffix;
         return fileName;
@@ -128,7 +128,12 @@ public class ElegantRequestHandler {
     // TODO: Update with invocation to the integrated compilers
     public static void compile(LinuxTornadoVM tornadoVM, TransactionMetaData transactionMetaData) throws IOException, InterruptedException {
         CompilationRequest compilerRequest = transactionMetaData.getCompilationRequest();
-        mapOfGeneratedKernelNames.put(compilerRequest.getId(), fileGeneratedPath + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
+        File idDirectory = new File(fileGeneratedPath + File.separator + compilerRequest.getId());
+        if (!idDirectory.exists()) {
+            idDirectory.mkdirs();
+        }
+        mapOfGeneratedKernelNames.put(compilerRequest.getId(),
+                fileGeneratedPath + File.separator + compilerRequest.getId() + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
         System.out.println("[compile] method in file: " + mapOfUploadedFunctionFileNames.get(compilerRequest.getId()));
         String methodFileName = mapOfUploadedFunctionFileNames.get(compilerRequest.getId());
         String deviceDescriptionJsonFileName = mapOfUploadedJsonFileNames.get(compilerRequest.getId());
