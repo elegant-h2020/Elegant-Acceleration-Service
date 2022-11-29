@@ -21,6 +21,8 @@ package uk.ac.manchester.acceleration.service.elegant.controller;
 
 import uk.ac.manchester.acceleration.service.elegant.tools.LinuxTornadoVM;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -128,8 +130,17 @@ public class ElegantRequestHandler {
         CompilationRequest compilerRequest = transactionMetaData.getCompilationRequest();
         mapOfGeneratedKernelNames.put(compilerRequest.getId(), fileGeneratedPath + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
         System.out.println("[compile] method in file: " + mapOfUploadedFunctionFileNames.get(compilerRequest.getId()));
-        tornadoVM.compile(mapOfUploadedFunctionFileNames.get(compilerRequest.getId()), mapOfUploadedJsonFileNames.get(compilerRequest.getId()), mapOfGeneratedKernelNames.get(compilerRequest.getId()));
+        String methodFileName = mapOfUploadedFunctionFileNames.get(compilerRequest.getId());
+        String deviceDescriptionJsonFileName = mapOfUploadedJsonFileNames.get(compilerRequest.getId());
+        String generatedKernelFileName = mapOfGeneratedKernelNames.get(compilerRequest.getId());
+        tornadoVM.compile(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, generatedKernelFileName);
+
         int exitCode = tornadoVM.waitFor();
         transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.SUBMITTED);
+        transactionMetaData.response = Response//
+                .status(Response.Status.ACCEPTED)//
+                .type(MediaType.TEXT_PLAIN_TYPE)//
+                .entity("New code acceleration request has been registered (#" + transactionMetaData.getCompilationRequest().getId() + ")\n")//
+                .build();
     }
 }
