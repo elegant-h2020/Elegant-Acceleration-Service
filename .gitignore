@@ -3,3 +3,4 @@
 *.iml
 /examples/uploaded/*
 /examples/boilerplate/*
+/examples/generated/*
