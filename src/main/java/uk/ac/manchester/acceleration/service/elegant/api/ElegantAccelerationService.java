@@ -74,7 +74,7 @@ public class ElegantAccelerationService {
     @Produces(MediaType.APPLICATION_JSON)
     public CompilationRequest retrieveRequest(@PathParam("requestId") long requestId) {
         System.out.println("The generated kernelFileName for request [" + requestId + "] of code is: " + ElegantRequestHandler.getGeneratedKernelFileName(requestId));
-        System.out.println("The uploaded jsonFileName for request [" + requestId + "] of code is: " + ElegantRequestHandler.getUploadedJsonFileName(requestId));
+        System.out.println("The uploaded jsonFileName for request [" + requestId + "] of code is: " + ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
         return ElegantRequestHandler.getRequest(requestId); // TODO Avoid creating an object. Use the class name and make methods static.
     }
 
@@ -125,6 +125,7 @@ public class ElegantAccelerationService {
                 ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
                 ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
                 ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
+                ElegantRequestHandler.addOrUpdateUploadedParameterSizeJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getParameterSizeFileName());
                 ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
             }
         }
@@ -139,12 +140,14 @@ public class ElegantAccelerationService {
         if (ServletFileUpload.isMultipartContent(request)) {
             ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
             ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
-            ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedJsonFileName(requestId));
+            ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
+            ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
             transactionMetaData = ElegantFileHandler.iterateAndParseUploadFilesFromRequest(request);
             transactionMetaData.getCompilationRequest().setId(requestId);
             ElegantRequestHandler.updateRequest(transactionMetaData.getCompilationRequest());
             ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
             ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
+            ElegantRequestHandler.addOrUpdateUploadedParameterSizeJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getParameterSizeFileName());
             ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
         }
         return transactionMetaData.response;
@@ -156,9 +159,9 @@ public class ElegantAccelerationService {
     public CompilationRequest delete(@PathParam("requestId") long requestId) {
         ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
         ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedJsonFileName(requestId));
-        ElegantRequestHandler.removeUploadedFunctionFileName(requestId);
-        ElegantRequestHandler.removeUploadedJsonFileName(requestId);
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
+        ElegantRequestHandler.removeUploadedFileNames(requestId);
         return ElegantRequestHandler.removeRequest(requestId);
     }
 }

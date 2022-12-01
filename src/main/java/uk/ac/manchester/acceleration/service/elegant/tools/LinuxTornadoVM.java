@@ -54,15 +54,15 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         return args.toArray(new String[args.size()]);
     }
 
-    private String[] getCommandForVirtualCompilation(long id, String methodFileName, String deviceDescriptionJsonFileName, String generatedKernelFileName) {
+    private String[] getCommandForVirtualCompilation(long id, String methodFileName, String deviceDescriptionJsonFileName, String parameterSizeJsonFileName, String generatedKernelFileName) {
         ArrayList<String> args = new ArrayList<>();
         String classpath = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id;
         String classFile = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id + File.separator + ClassGenerator.getVirtualClassName(methodFileName) + ".class";
-        String deviceJsonFile = deviceDescriptionJsonFileName;
         args.add(environmentTornadoVM.get(EnvironmentVariables.SERVICE_DIR) + "/bin/runCompilation.sh");
         args.add(classpath);
         args.add(classFile);
-        args.add(deviceJsonFile);
+        args.add(deviceDescriptionJsonFileName);
+        args.add(parameterSizeJsonFileName);
         args.add(generatedKernelFileName);
         args.add(ClassGenerator.getMethodNameFromFileName(methodFileName));
         return args.toArray(new String[args.size()]);
@@ -83,8 +83,9 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         printOutputOfProcess(tornadoVMProcess);
     }
 
-    public void compileBytecodeToOpenCL(long id, String methodFileName, String deviceDescriptionJsonFileName, String generatedKernelFileName) throws IOException, InterruptedException {
-        tornadoVMProcessBuilder.command(getCommandForVirtualCompilation(id, methodFileName, deviceDescriptionJsonFileName, generatedKernelFileName));
+    public void compileBytecodeToOpenCL(long id, String methodFileName, String deviceDescriptionJsonFileName, String parameterSizeJsonFileName, String generatedKernelFileName)
+            throws IOException, InterruptedException {
+        tornadoVMProcessBuilder.command(getCommandForVirtualCompilation(id, methodFileName, deviceDescriptionJsonFileName, parameterSizeJsonFileName, generatedKernelFileName));
         this.tornadoVMProcess = tornadoVMProcessBuilder.start();
         int exitCode = tornadoVMProcessWaitFor();
 

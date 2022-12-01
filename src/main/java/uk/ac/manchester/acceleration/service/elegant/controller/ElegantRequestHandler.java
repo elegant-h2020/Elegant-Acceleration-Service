@@ -40,6 +40,7 @@ public class ElegantRequestHandler {
     // TODO Remove hashmaps and update the database functionality
     private static ConcurrentHashMap<Long, String> mapOfUploadedFunctionFileNames = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Long, String> mapOfUploadedDeviceJsonFileNames = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, String> mapOfUploadedParameterSizeFileNames = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Long, String> mapOfGeneratedKernelNames = new ConcurrentHashMap<>();
 
     private static AtomicLong uid = new AtomicLong(0);
@@ -84,8 +85,12 @@ public class ElegantRequestHandler {
         return mapOfUploadedFunctionFileNames.get(id);
     }
 
-    public static String getUploadedJsonFileName(long id) {
+    public static String getUploadedDeviceJsonFileName(long id) {
         return mapOfUploadedDeviceJsonFileNames.get(id);
+    }
+
+    public static String getUploadedParameterSizeJsonFileName(long id) {
+        return mapOfUploadedParameterSizeFileNames.get(id);
     }
 
     public static CompilationRequest addRequest(CompilationRequest request) {
@@ -104,25 +109,25 @@ public class ElegantRequestHandler {
     }
 
     public static void addOrUpdateUploadedFunctionFileName(CompilationRequest request, String functionFileName) {
-        System.out.println("Add " + functionFileName + " - for id: " + request.getId());
         mapOfUploadedFunctionFileNames.put(request.getId(), functionFileName);
     }
 
     public static void addOrUpdateUploadedDeviceJsonFileName(CompilationRequest request, String jsonFileName) {
-        System.out.println("Add Json " + jsonFileName + " - for id: " + request.getId());
         mapOfUploadedDeviceJsonFileNames.put(request.getId(), jsonFileName);
+    }
+
+    public static void addOrUpdateUploadedParameterSizeJsonFileName(CompilationRequest request, String jsonFileName) {
+        mapOfUploadedParameterSizeFileNames.put(request.getId(), jsonFileName);
     }
 
     public static CompilationRequest removeRequest(long id) {
         return requests.remove(id);
     }
 
-    public static void removeUploadedFunctionFileName(long id) {
+    public static void removeUploadedFileNames(long id) {
         mapOfUploadedFunctionFileNames.remove(id);
-    }
-
-    public static void removeUploadedJsonFileName(long id) {
         mapOfUploadedDeviceJsonFileNames.remove(id);
+        mapOfUploadedParameterSizeFileNames.remove(id);
     }
 
     // TODO: Update with invocation to the integrated compilers
@@ -137,10 +142,11 @@ public class ElegantRequestHandler {
         System.out.println("[compile] method in file: " + mapOfUploadedFunctionFileNames.get(compilerRequest.getId()));
         String methodFileName = mapOfUploadedFunctionFileNames.get(compilerRequest.getId());
         String deviceDescriptionJsonFileName = mapOfUploadedDeviceJsonFileNames.get(compilerRequest.getId());
+        String parameterSizeJsonFileName = mapOfUploadedParameterSizeFileNames.get(compilerRequest.getId());
         String generatedKernelFileName = mapOfGeneratedKernelNames.get(compilerRequest.getId());
         tornadoVM.compileToBytecode(compilerRequest.getId(), methodFileName);
 
-        tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, generatedKernelFileName);
+        tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, parameterSizeJsonFileName, generatedKernelFileName);
 
         transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.SUBMITTED);
         transactionMetaData.response = Response//
