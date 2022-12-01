@@ -178,8 +178,12 @@ public class ElegantFileHandler {
         String fileInfoJson = JsonGenerator.createJsonContents(transactionMetaData.getCompilationRequest().getFileInfo());
         String fileInfoFileName = uploadedDirectory + "/fileInfo.json";
 
+        String parameterInfoJson = JsonGenerator.createJsonContents(transactionMetaData.getCompilationRequest().getParameterInfo());
+        String parameterInfoFileName = uploadedDirectory + "/parameterInfo.json";
+
         writeStringToFile(deviceJson, deviceFileName);
         writeStringToFile(fileInfoJson, fileInfoFileName);
+        writeStringToFile(parameterInfoJson, parameterInfoFileName);
 
         cleanupInputFiles(transactionMetaData);
         transactionMetaData.setJsonFileName(deviceFileName);

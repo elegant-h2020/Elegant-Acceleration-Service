@@ -53,6 +53,15 @@ public class JsonGenerator {
             emitKeyValuePair(stringBuilder, "functionName", fileInfo.getFunctionName(), true, false);
             emitKeyValuePair(stringBuilder, "programmingLanguage", fileInfo.getProgrammingLanguage(), true, true);
             emitClosingBrace(stringBuilder);
+        } else if (object instanceof ParameterInfo) {
+            ParameterInfo parameterInfo = (ParameterInfo) object;
+            emitOpeningBrace(stringBuilder);
+            for (int i = 0; i < parameterInfo.getKeys().length; i++) {
+                String parameterString = parameterInfo.getKeys()[i];
+                String sizeString = String.valueOf(parameterInfo.getValues()[i]);
+                emitKeyValuePair(stringBuilder, parameterString, sizeString, false, (i == parameterInfo.getKeys().length - 1) ? true : false);
+            }
+            emitClosingBrace(stringBuilder);
         } else {
             throw new RuntimeException("Object is not recongized for the creation of JSON file in the ELEGANT Acceleration Service.");
         }
