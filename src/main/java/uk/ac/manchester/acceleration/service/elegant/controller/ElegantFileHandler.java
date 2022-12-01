@@ -31,16 +31,17 @@ import org.json.simple.parser.JSONParser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.util.Map;
 
 public class ElegantFileHandler {
@@ -53,7 +54,6 @@ public class ElegantFileHandler {
     private static final String FILE_UPLOAD_PATH = "/home/thanos/repositories/Elegant-Acceleration-Service/examples/uploaded";
 
     private static CompilationRequest parseJsonFileToCompilationRequest(String fileName) {
-        System.out.println("---Parsing DeviceInfo file: " + fileName);
         JSONParser parser = new JSONParser();
         try {
             Object obj = parser.parse(new FileReader(fileName));
@@ -136,35 +136,68 @@ public class ElegantFileHandler {
         }
     }
 
-    public static void cleanUploadedFiles(TransactionMetaData transactionMetaData) {
-        String sourceJsonFileName = transactionMetaData.getJsonFileName();
-        String sourceFunctionFileName = transactionMetaData.getFunctionFileName();
-        String targetJsonFileName = null;
-        String targetFunctionFileName = null;
+    private static String resolveUploadedDirectory(TransactionMetaData transactionMetaData) {
         long id = transactionMetaData.getCompilationRequest().getId();
 
         File idDirectory = new File(FILE_UPLOAD_PATH + File.separator + id);
         if (!idDirectory.exists()) {
             idDirectory.mkdirs();
-            int jsonSubstringLength = sourceJsonFileName.split("\\/").length;
-            targetJsonFileName = idDirectory.getAbsolutePath() + File.separator + sourceJsonFileName.split("\\/")[jsonSubstringLength - 1];
+        }
+        return idDirectory.getAbsolutePath();
+    }
 
-            int functionSubstringLength = sourceFunctionFileName.split("\\/").length;
-            targetFunctionFileName = idDirectory.getAbsolutePath() + File.separator + sourceFunctionFileName.split("\\/")[functionSubstringLength - 1];
+    private static void writeStringToFile(String string, String fileName) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+            writer.write(string);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            Path sourceJsonPath = Paths.get(sourceJsonFileName);
-            Path targetJsonPath = Paths.get(targetJsonFileName);
-            Path sourceFunctionPath = Paths.get(sourceFunctionFileName);
-            Path targetFunctionPath = Paths.get(targetFunctionFileName);
+    public static void generateInternalJsonFiles(TransactionMetaData transactionMetaData) {
+        String uploadedDirectory = resolveUploadedDirectory(transactionMetaData);
 
-            try {
-                Files.move(sourceJsonPath, targetJsonPath, StandardCopyOption.REPLACE_EXISTING);
-                Files.move(sourceFunctionPath, targetFunctionPath, StandardCopyOption.REPLACE_EXISTING);
-                transactionMetaData.setJsonFileName(targetJsonFileName);
-                transactionMetaData.setFunctionFileName(targetFunctionFileName);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        String deviceJson = JsonGenerator.createJsonContents(transactionMetaData.getCompilationRequest().getDeviceInfo());
+        String deviceFileName = uploadedDirectory + "/deviceInfo.json";
+
+        String fileInfoJson = JsonGenerator.createJsonContents(transactionMetaData.getCompilationRequest().getFileInfo());
+        String fileInfoFileName = uploadedDirectory + "/fileInfo.json";
+
+        writeStringToFile(deviceJson, deviceFileName);
+        writeStringToFile(fileInfoJson, fileInfoFileName);
+
+        cleanupInputFiles(transactionMetaData);
+        transactionMetaData.setJsonFileName(deviceFileName);
+    }
+
+    public static void cleanupInputFiles(TransactionMetaData transactionMetaData) {
+        String sourceJsonFileName = transactionMetaData.getJsonFileName();
+        String sourceFunctionFileName = transactionMetaData.getFunctionFileName();
+
+        try {
+            Files.deleteIfExists(Paths.get(sourceJsonFileName));
+            transferFunctionFileToUploadedDirectory(sourceFunctionFileName, transactionMetaData);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void transferFunctionFileToUploadedDirectory(String sourceFile, TransactionMetaData transactionMetaData) {
+        String targetFunctionFileName = null;
+        String targetDirectory = resolveUploadedDirectory(transactionMetaData);
+
+        int functionSubstringLength = sourceFile.split("\\/").length;
+        targetFunctionFileName = targetDirectory + File.separator + sourceFile.split("\\/")[functionSubstringLength - 1];
+        Path sourceFunctionPath = Paths.get(sourceFile);
+        Path targetFunctionPath = Paths.get(targetFunctionFileName);
+
+        try {
+            Files.move(sourceFunctionPath, targetFunctionPath, StandardCopyOption.REPLACE_EXISTING);
+            transactionMetaData.setFunctionFileName(targetFunctionFileName);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

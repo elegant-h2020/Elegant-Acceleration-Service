@@ -26,7 +26,6 @@ import uk.ac.manchester.acceleration.service.elegant.controller.ElegantFileHandl
 import uk.ac.manchester.acceleration.service.elegant.controller.EnvironmentVariables;
 import uk.ac.manchester.acceleration.service.elegant.controller.TransactionMetaData;
 import uk.ac.manchester.acceleration.service.elegant.tools.LinuxTornadoVM;
-import uk.ac.manchester.acceleration.service.elegant.tools.TornadoVMInterface;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -122,7 +121,7 @@ public class ElegantAccelerationService {
             if (transactionMetaData.getCompilationRequest() != null) {
                 long uid = ElegantRequestHandler.incrementAndGetUid();
                 transactionMetaData.getCompilationRequest().setId(uid);
-                ElegantFileHandler.cleanUploadedFiles(transactionMetaData);
+                ElegantFileHandler.generateInternalJsonFiles(transactionMetaData);
                 ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
                 ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
                 ElegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
