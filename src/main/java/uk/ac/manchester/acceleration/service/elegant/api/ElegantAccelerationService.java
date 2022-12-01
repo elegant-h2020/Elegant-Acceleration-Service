@@ -125,6 +125,7 @@ public class ElegantAccelerationService {
                 ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
                 ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
                 ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
+                ElegantRequestHandler.addOrUpdateUploadedFileInfoFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFileInfoName());
                 ElegantRequestHandler.addOrUpdateUploadedParameterSizeJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getParameterSizeFileName());
                 ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
             }
@@ -158,9 +159,14 @@ public class ElegantAccelerationService {
     @Produces(MediaType.APPLICATION_JSON)
     public CompilationRequest delete(@PathParam("requestId") long requestId) {
         ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
-        ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
         ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
         ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFileInfoJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+        ElegantFileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
+        ElegantFileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+
+        ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
         ElegantRequestHandler.removeUploadedFileNames(requestId);
         return ElegantRequestHandler.removeRequest(requestId);
     }

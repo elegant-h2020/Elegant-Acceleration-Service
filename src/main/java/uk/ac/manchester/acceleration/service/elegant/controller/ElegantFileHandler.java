@@ -149,9 +149,7 @@ public class ElegantFileHandler {
         }
     }
 
-    private static String resolveUploadedDirectory(TransactionMetaData transactionMetaData) {
-        long id = transactionMetaData.getCompilationRequest().getId();
-
+    private static String resolveUploadedDirectory(long id) {
         File idDirectory = new File(FILE_UPLOAD_PATH + File.separator + id);
         if (!idDirectory.exists()) {
             idDirectory.mkdirs();
@@ -170,7 +168,7 @@ public class ElegantFileHandler {
     }
 
     public static void generateInternalJsonFiles(TransactionMetaData transactionMetaData) {
-        String uploadedDirectory = resolveUploadedDirectory(transactionMetaData);
+        String uploadedDirectory = resolveUploadedDirectory(transactionMetaData.getCompilationRequest().getId());
 
         String deviceJson = JsonGenerator.createJsonContents(transactionMetaData.getCompilationRequest().getDeviceInfo());
         String deviceFileName = uploadedDirectory + "/deviceInfo.json";
@@ -188,6 +186,7 @@ public class ElegantFileHandler {
         cleanupInputFiles(transactionMetaData);
         transactionMetaData.setJsonFileName(deviceFileName);
         transactionMetaData.setParameterSizeFileName(parameterInfoFileName);
+        transactionMetaData.setFileInfoName(fileInfoFileName);
     }
 
     public static void cleanupInputFiles(TransactionMetaData transactionMetaData) {
@@ -204,7 +203,7 @@ public class ElegantFileHandler {
 
     private static void transferFunctionFileToUploadedDirectory(String sourceFile, TransactionMetaData transactionMetaData) {
         String targetFunctionFileName = null;
-        String targetDirectory = resolveUploadedDirectory(transactionMetaData);
+        String targetDirectory = resolveUploadedDirectory(transactionMetaData.getCompilationRequest().getId());
 
         int functionSubstringLength = sourceFile.split("\\/").length;
         targetFunctionFileName = targetDirectory + File.separator + sourceFile.split("\\/")[functionSubstringLength - 1];
@@ -267,12 +266,19 @@ public class ElegantFileHandler {
             code = 404;
             msg = e.getMessage();
         }
-        TransactionMetaData transactionMetaData = new TransactionMetaData(compilationRequest, functionFileName, jsonFileName, Response.status(code).entity(msg).build());
+        TransactionMetaData transactionMetaData = new TransactionMetaData(compilationRequest, functionFileName, jsonFileName, null, Response.status(code).entity(msg).build());
         return transactionMetaData;
     }
 
     public static void removeFile(String fileName) {
         File file = new File(fileName);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    public static void removeParentDirectoryOfFile(String fileName) {
+        File file = new File(fileName).getParentFile();
         if (file.exists()) {
             file.delete();
         }

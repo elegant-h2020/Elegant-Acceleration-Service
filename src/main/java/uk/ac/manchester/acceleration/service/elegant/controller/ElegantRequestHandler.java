@@ -40,6 +40,7 @@ public class ElegantRequestHandler {
     // TODO Remove hashmaps and update the database functionality
     private static ConcurrentHashMap<Long, String> mapOfUploadedFunctionFileNames = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Long, String> mapOfUploadedDeviceJsonFileNames = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, String> mapOfUploadedFileInfoJsonFileNames = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Long, String> mapOfUploadedParameterSizeFileNames = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Long, String> mapOfGeneratedKernelNames = new ConcurrentHashMap<>();
 
@@ -89,6 +90,10 @@ public class ElegantRequestHandler {
         return mapOfUploadedDeviceJsonFileNames.get(id);
     }
 
+    public static String getUploadedFileInfoJsonFileName(long id) {
+        return mapOfUploadedFileInfoJsonFileNames.get(id);
+    }
+
     public static String getUploadedParameterSizeJsonFileName(long id) {
         return mapOfUploadedParameterSizeFileNames.get(id);
     }
@@ -116,6 +121,10 @@ public class ElegantRequestHandler {
         mapOfUploadedDeviceJsonFileNames.put(request.getId(), jsonFileName);
     }
 
+    public static void addOrUpdateUploadedFileInfoFileName(CompilationRequest request, String jsonFileName) {
+        mapOfUploadedFileInfoJsonFileNames.put(request.getId(), jsonFileName);
+    }
+
     public static void addOrUpdateUploadedParameterSizeJsonFileName(CompilationRequest request, String jsonFileName) {
         mapOfUploadedParameterSizeFileNames.put(request.getId(), jsonFileName);
     }
@@ -128,6 +137,7 @@ public class ElegantRequestHandler {
         mapOfUploadedFunctionFileNames.remove(id);
         mapOfUploadedDeviceJsonFileNames.remove(id);
         mapOfUploadedParameterSizeFileNames.remove(id);
+        mapOfUploadedFileInfoJsonFileNames.remove(id);
     }
 
     // TODO: Update with invocation to the integrated compilers
