@@ -25,6 +25,7 @@ public class TransactionMetaData {
     private CompilationRequest compilationRequest;
     private String functionFileName;
     private String jsonFileName;
+    private String parameterSizeFileName;
 
     public Response response;
 
@@ -58,5 +59,13 @@ public class TransactionMetaData {
 
     public void setJsonFileName(String jsonFileName) {
         this.jsonFileName = jsonFileName;
+    }
+
+    public String getParameterSizeFileName() {
+        return parameterSizeFileName;
+    }
+
+    public void setParameterSizeFileName(String parameterSizeFileName) {
+        this.parameterSizeFileName = parameterSizeFileName;
     }
 }

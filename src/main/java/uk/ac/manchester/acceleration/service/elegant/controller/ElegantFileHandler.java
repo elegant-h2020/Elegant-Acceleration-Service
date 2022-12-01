@@ -187,6 +187,7 @@ public class ElegantFileHandler {
 
         cleanupInputFiles(transactionMetaData);
         transactionMetaData.setJsonFileName(deviceFileName);
+        transactionMetaData.setParameterSizeFileName(parameterInfoFileName);
     }
 
     public static void cleanupInputFiles(TransactionMetaData transactionMetaData) {
