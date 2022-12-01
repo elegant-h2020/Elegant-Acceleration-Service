@@ -149,7 +149,6 @@ public class ElegantRequestHandler {
         }
         mapOfGeneratedKernelNames.put(compilerRequest.getId(),
                 fileGeneratedPath + File.separator + compilerRequest.getId() + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
-        System.out.println("[compile] method in file: " + mapOfUploadedFunctionFileNames.get(compilerRequest.getId()));
         String methodFileName = mapOfUploadedFunctionFileNames.get(compilerRequest.getId());
         String deviceDescriptionJsonFileName = mapOfUploadedDeviceJsonFileNames.get(compilerRequest.getId());
         String parameterSizeJsonFileName = mapOfUploadedParameterSizeFileNames.get(compilerRequest.getId());
@@ -158,7 +157,11 @@ public class ElegantRequestHandler {
 
         tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, parameterSizeJsonFileName, generatedKernelFileName);
 
-        transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.SUBMITTED);
+        if (tornadoVM.getExitCode() == 0) {
+            transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.COMPLETED);
+        } else {
+            transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.FAILED);
+        }
         transactionMetaData.response = Response//
                 .status(Response.Status.ACCEPTED)//
                 .type(MediaType.TEXT_PLAIN_TYPE)//
