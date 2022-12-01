@@ -58,7 +58,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         ArrayList<String> args = new ArrayList<>();
         String classpath = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id;
         String classFile = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id + File.separator + ClassGenerator.getVirtualClassName(methodFileName) + ".class";
-        String deviceJsonFile = "/home/thanos/Desktop/test-virtual/test.json"; // FIXME Get the right json file
+        String deviceJsonFile = deviceDescriptionJsonFileName;
         args.add(environmentTornadoVM.get(EnvironmentVariables.SERVICE_DIR) + "/bin/runCompilation.sh");
         args.add(classpath);
         args.add(classFile);
