@@ -39,7 +39,7 @@ public class ElegantRequestHandler {
 
     // TODO Remove hashmaps and update the database functionality
     private static ConcurrentHashMap<Long, String> mapOfUploadedFunctionFileNames = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<Long, String> mapOfUploadedJsonFileNames = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, String> mapOfUploadedDeviceJsonFileNames = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Long, String> mapOfGeneratedKernelNames = new ConcurrentHashMap<>();
 
     private static AtomicLong uid = new AtomicLong(0);
@@ -85,7 +85,7 @@ public class ElegantRequestHandler {
     }
 
     public static String getUploadedJsonFileName(long id) {
-        return mapOfUploadedJsonFileNames.get(id);
+        return mapOfUploadedDeviceJsonFileNames.get(id);
     }
 
     public static CompilationRequest addRequest(CompilationRequest request) {
@@ -108,9 +108,9 @@ public class ElegantRequestHandler {
         mapOfUploadedFunctionFileNames.put(request.getId(), functionFileName);
     }
 
-    public static void addOrUpdateUploadedJsonFileName(CompilationRequest request, String jsonFileName) {
+    public static void addOrUpdateUploadedDeviceJsonFileName(CompilationRequest request, String jsonFileName) {
         System.out.println("Add Json " + jsonFileName + " - for id: " + request.getId());
-        mapOfUploadedJsonFileNames.put(request.getId(), jsonFileName);
+        mapOfUploadedDeviceJsonFileNames.put(request.getId(), jsonFileName);
     }
 
     public static CompilationRequest removeRequest(long id) {
@@ -122,7 +122,7 @@ public class ElegantRequestHandler {
     }
 
     public static void removeUploadedJsonFileName(long id) {
-        mapOfUploadedJsonFileNames.remove(id);
+        mapOfUploadedDeviceJsonFileNames.remove(id);
     }
 
     // TODO: Update with invocation to the integrated compilers
@@ -136,7 +136,7 @@ public class ElegantRequestHandler {
                 fileGeneratedPath + File.separator + compilerRequest.getId() + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
         System.out.println("[compile] method in file: " + mapOfUploadedFunctionFileNames.get(compilerRequest.getId()));
         String methodFileName = mapOfUploadedFunctionFileNames.get(compilerRequest.getId());
-        String deviceDescriptionJsonFileName = mapOfUploadedJsonFileNames.get(compilerRequest.getId());
+        String deviceDescriptionJsonFileName = mapOfUploadedDeviceJsonFileNames.get(compilerRequest.getId());
         String generatedKernelFileName = mapOfGeneratedKernelNames.get(compilerRequest.getId());
         tornadoVM.compileToBytecode(compilerRequest.getId(), methodFileName);
 

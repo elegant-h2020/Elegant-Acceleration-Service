@@ -124,7 +124,7 @@ public class ElegantAccelerationService {
                 ElegantFileHandler.generateInternalJsonFiles(transactionMetaData);
                 ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
                 ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
-                ElegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
+                ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
                 ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
             }
         }
@@ -144,7 +144,7 @@ public class ElegantAccelerationService {
             transactionMetaData.getCompilationRequest().setId(requestId);
             ElegantRequestHandler.updateRequest(transactionMetaData.getCompilationRequest());
             ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
-            ElegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
+            ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
             ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
         }
         return transactionMetaData.response;
