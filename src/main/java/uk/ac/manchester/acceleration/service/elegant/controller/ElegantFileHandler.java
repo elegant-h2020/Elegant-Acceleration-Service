@@ -118,7 +118,7 @@ public class ElegantFileHandler {
             DeviceInfo deviceInfo = new DeviceInfo(deviceName[0], doubleFPSupport[0], maxWorkItemSizes, deviceAddressBits[0], deviceType[0], deviceExtensions[0], availableProcessors[0]);
 
             // Reconstruct ParameterInfo
-            Map<Object, Object> parameterInfoMap = (Map<Object, Object>) (jsonObject.get("parameters"));
+            Map<Object, Object> parameterInfoMap = (Map<Object, Object>) (jsonObject.get("parameterSizes"));
             final String[] keys = new String[parameterInfoMap.size()];
             final int[] values = new int[parameterInfoMap.size()];
             final int[] itemIndex = { 0 };

@@ -3,10 +3,10 @@
     "functionName": "vectorAdd",
     "programmingLanguage": "C++"
   },
-  "parameters": {
-    "a": "1024",
-    "b": "1024",
-    "c": "1024"
+  "parameterSizes": {
+    "a": 1024,
+    "b": 1024,
+    "c": 1024
   },
   "deviceInfo": {
     "deviceName": "Nvidia GPU 1",
