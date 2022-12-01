@@ -117,8 +117,21 @@ public class ElegantFileHandler {
             });
             DeviceInfo deviceInfo = new DeviceInfo(deviceName[0], doubleFPSupport[0], maxWorkItemSizes, deviceAddressBits[0], deviceType[0], deviceExtensions[0], availableProcessors[0]);
 
+            // Reconstruct ParameterInfo
+            Map<Object, Object> parameterInfoMap = (Map<Object, Object>) (jsonObject.get("parameters"));
+            final String[] keys = new String[parameterInfoMap.size()];
+            final int[] values = new int[parameterInfoMap.size()];
+            final int[] itemIndex = { 0 };
+
+            parameterInfoMap.forEach((key, value) -> {
+                keys[itemIndex[0]] = (String) key;
+                values[itemIndex[0]] = ((Long) value).intValue();
+                itemIndex[0]++;
+            });
+            ParameterInfo parameterInfo = new ParameterInfo(keys, values);
+
             // Compose CompilerRequest
-            CompilationRequest compilerRequest = new CompilationRequest(fileInfo, deviceInfo);
+            CompilationRequest compilerRequest = new CompilationRequest(fileInfo, deviceInfo, parameterInfo);
             return compilerRequest;
         } catch (Exception e) {
             e.printStackTrace();
