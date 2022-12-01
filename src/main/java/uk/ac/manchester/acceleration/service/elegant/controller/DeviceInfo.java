@@ -45,7 +45,7 @@ public class DeviceInfo {
         return deviceName;
     }
 
-    public boolean isDoubleFPSupport() {
+    public boolean getDoubleFPSupport() {
         return doubleFPSupport;
     }
 
