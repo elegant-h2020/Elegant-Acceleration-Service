@@ -1,4 +1,4 @@
-package uk.ac.manchester.acceleration.service.elegant.tools;
+package uk.ac.manchester.elegant.acceleration.service.tools;
 
 import java.io.IOException;
 

@@ -18,39 +18,50 @@ Acceleration Webservice. All dependencies are available in the [pom.xml](pom.xml
 git clone https://github.com/elegant-h2020/Elegant-Acceleration-Service.git
 ```
 
-### 2. Build the service:
+### 2. Download JDK8 (This JDK is used only to build the service.)
 
-```bash
-mvn clean install
-```
-
-### 3. Download JDK 8 and a GlassFish server
-
-#### Download JDK 8
 ```bash
 wget --no-check-certificate -O /tmp/openjdk-8u222b10.tar.gz https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jdk_x64_linux_8u222b10.tar.gz
 tar xzvf /tmp/openjdk-8u222b10.tar.gz --directory /usr/lib/jvm/
 mv /usr/lib/jvm/openjdk-8u222-b10 /usr/lib/jvm/java-8-openjdk-amd64
 ```
 
+### 3. Install dependencies
 
-#### Download GlassFish 6.0.0:
+- Install TornadoVM. We have tested it with GraalVM JDK 11 and OpenCL
+```bash
+git clone https://github.com/beehive-lab/TornadoVM.git
+cd TornadoVM
+./scripts/tornadoVMInstaller.sh --graal-jdk-11 --opencl
+source source.sh
+cd ..
+```
+
+- Download GlassFish 6.0.0:
 
 ```bash
-cd ~
 wget 'https://www.eclipse.org/downloads/download.php?file=/ee4j/glassfish/glassfish-6.0.0.zip' -O glassfish-6.0.0.zip
 unzip glassfish-6.0.0.zip
-cd ~/glassfish6
+cd glassfish6
 echo "AS_JAVA=/usr/lib/jvm/openjdk-8u222-b10" >> ./glassfish/config/asenv.conf
 ```
 
-### Initialize the environment and deploy the local server
+### 4. Build the service (using JDK8)
 
-a) Set environmental variables
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+mvn clean install
+```
+
+
+### 5. Set up the environment and deploy the local server
+
+a) Set environmental variables. To deploy the service, JDK 11 is used.
 ```bash
 export SERVICE_HOME=<path-to-repository>/Elegant-Acceleration-Service
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-export GLASSFISH_HOME=~/glassfish6/glassfish/bin
+export JAVA_HOME=<path-to-jdk11>
+export GLASSFISH_HOME=<path-to-glassfish6>/bin #export GLASSFISH_HOME=~/glassfish6/glassfish/bin
+export TORNADOVM_ROOT=<path-to-TornadoVM-repository>
 ```
 
 b) Start GlassFish local server:
@@ -70,7 +81,7 @@ d) Stop GlassFish local server:
 $GLASSFISH_HOME/asadmin stop-domain domain1
 ```
 
-### 5. Run an example of POST/GET requests from the terminal and from the path of the repository since the examples use relative paths:
+### 6. Run an example of POST/GET requests from the terminal and from the path of the repository since the examples use relative paths:
 
 ```bash
 curl -X POST -H "Content-Type: multipart/form-data" -F "codeFile=@examples/inputFiles/vectorAdd.java" -F "jsonFile=@examples/inputFiles/deviceInfoJava.json" http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/submit
@@ -81,8 +92,8 @@ The response contains a message regarding the outcome, followed by an identifier
 New code acceleration request has been registered (#1)
 ```
 
-The `id` identifier can be used to: i) update a request entry, ii) retrieve the compiled kernel via a GET request, or iii) the state of a
-request, as follows:
+The `id` identifier can be used to: a) update a request entry, b) retrieve the compiled kernel via a GET request, c) query the state of a
+request, or d) delete a request, as follows:
 
 #### A. To update a request (for example instead of a Java vectorAdd method to compile a C++ vectorAdd function):
 
@@ -147,7 +158,7 @@ This request returns the state of the request with `id` 1:
 "COMPLETED"
 ```
 
-### 6. Run an example of DELETE request from the terminal:
+#### D. Run an example of DELETE request from the terminal:
 
 ```bash
 curl -X DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/

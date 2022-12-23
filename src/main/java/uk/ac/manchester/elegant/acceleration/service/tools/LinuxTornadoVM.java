@@ -1,13 +1,12 @@
-package uk.ac.manchester.acceleration.service.elegant.tools;
+package uk.ac.manchester.elegant.acceleration.service.tools;
 
-import uk.ac.manchester.acceleration.service.elegant.controller.EnvironmentVariables;
+import uk.ac.manchester.elegant.acceleration.service.controller.EnvironmentVariables;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 public class LinuxTornadoVM implements TornadoVMInterface {
@@ -21,7 +20,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         super();
         this.tornadoVMProcessBuilder = new ProcessBuilder();
         initializeEnvironment();
-        tornadoVMProcessBuilder.directory(new File(environmentTornadoVM.get("SERVICE_DIR")));
+        tornadoVMProcessBuilder.directory(new File(environmentTornadoVM.get("SERVICE_HOME")));
     }
 
     public static String getEnvironmentVariable(String key) {
@@ -29,15 +28,15 @@ public class LinuxTornadoVM implements TornadoVMInterface {
     }
 
     @Override
-    public void initializeEnvironment() { // FIXME: Update paths to be generic
+    public void initializeEnvironment() {
         environmentTornadoVM = tornadoVMProcessBuilder.environment();
-        environmentTornadoVM.put(EnvironmentVariables.JAVA_HOME, "/home/thanos/installation/graalvm-ce-java11-22.2.0");
-        environmentTornadoVM.put(EnvironmentVariables.SERVICE_DIR, "/home/thanos/repositories/Elegant/Elegant-Acceleration-Service");
-        environmentTornadoVM.put(EnvironmentVariables.TORNADOVM_DIR, "/home/thanos/repositories/TornadoVM-Internal");
-        environmentTornadoVM.put(EnvironmentVariables.TORNADO_SDK, "/home/thanos/repositories/TornadoVM-Internal/bin/sdk");
-        environmentTornadoVM.put(EnvironmentVariables.UPLOADED_DIR, "/home/thanos/repositories/Elegant/Elegant-Acceleration-Service/examples/uploaded");
-        environmentTornadoVM.put(EnvironmentVariables.GENERATED_KERNELS_DIR, "/home/thanos/repositories/Elegant/Elegant-Acceleration-Service/examples/generated");
-        environmentTornadoVM.put(EnvironmentVariables.BOILERPLATE_DIR, "/home/thanos/repositories/Elegant/Elegant-Acceleration-Service/examples/boilerplate/");
+        environmentTornadoVM.put(EnvironmentVariables.JAVA_HOME, System.getenv("JAVA_HOME"));
+        environmentTornadoVM.put(EnvironmentVariables.SERVICE_HOME, System.getenv("SERVICE_HOME"));
+        environmentTornadoVM.put(EnvironmentVariables.TORNADOVM_ROOT, System.getenv("TORNADOVM_ROOT"));
+        environmentTornadoVM.put(EnvironmentVariables.TORNADO_SDK, System.getenv("TORNADOVM_ROOT")+"/bin/sdk");
+        environmentTornadoVM.put(EnvironmentVariables.UPLOADED_DIR, System.getenv("SERVICE_HOME")+"/examples/uploaded");
+        environmentTornadoVM.put(EnvironmentVariables.GENERATED_KERNELS_DIR, System.getenv("SERVICE_HOME")+"/examples/generated");
+        environmentTornadoVM.put(EnvironmentVariables.BOILERPLATE_DIR, System.getenv("SERVICE_HOME")+"/examples/boilerplate");
     }
 
     @Override
@@ -49,17 +48,17 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         ArrayList<String> args = new ArrayList<>();
         args.add(environmentTornadoVM.get(EnvironmentVariables.JAVA_HOME) + "/bin/javac");
         args.add("-cp");
-        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_DIR) + "/dist/tornado-sdk/tornado-sdk-0.15-dev-04f4353/share/java/tornado/tornado-api-0.15-dev.jar");
+        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_ROOT) + "/dist/tornado-sdk/tornado-sdk-0.15-dev-04f4353/share/java/tornado/tornado-api-0.15-dev.jar");
         args.add("-g:vars");
-        args.add(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id + "/" + ClassGenerator.getVirtualClassFileName(methodFileName));
+        args.add(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + "/" + ClassGenerator.getVirtualClassFileName(methodFileName));
         return args.toArray(new String[args.size()]);
     }
 
     private String[] getCommandForVirtualCompilation(long id, String methodFileName, String deviceDescriptionJsonFileName, String parameterSizeJsonFileName, String generatedKernelFileName) {
         ArrayList<String> args = new ArrayList<>();
-        String classpath = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id;
-        String classFile = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id + File.separator + ClassGenerator.getVirtualClassName(methodFileName) + ".class";
-        args.add(environmentTornadoVM.get(EnvironmentVariables.SERVICE_DIR) + "/bin/runCompilation.sh");
+        String classpath = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id;
+        String classFile = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + File.separator + ClassGenerator.getVirtualClassName(methodFileName) + ".class";
+        args.add(environmentTornadoVM.get(EnvironmentVariables.SERVICE_HOME) + "/bin/runCompilation.sh");
         args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADO_SDK) + "/bin/tornado");
         args.add(classpath);
         args.add(classFile);
@@ -72,7 +71,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
 
     public void compileToBytecode(long id, String methodFileName) throws IOException, InterruptedException {
         String classBody = ClassGenerator.generateBoilerplateCode(methodFileName);
-        File idDirectory = new File(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id);
+        File idDirectory = new File(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id);
         if (!idDirectory.exists()) {
             idDirectory.mkdirs();
         }
@@ -87,6 +86,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
 
     public void compileBytecodeToOpenCL(long id, String methodFileName, String deviceDescriptionJsonFileName, String parameterSizeJsonFileName, String generatedKernelFileName)
             throws IOException, InterruptedException {
+
         tornadoVMProcessBuilder.command(getCommandForVirtualCompilation(id, methodFileName, deviceDescriptionJsonFileName, parameterSizeJsonFileName, generatedKernelFileName));
         this.tornadoVMProcess = tornadoVMProcessBuilder.start();
         int exitCode = tornadoVMProcessWaitFor();

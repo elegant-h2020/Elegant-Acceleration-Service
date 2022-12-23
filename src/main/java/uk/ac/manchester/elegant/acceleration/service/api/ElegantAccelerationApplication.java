@@ -1,6 +1,6 @@
 /*
  * This file is part of the ELEGANT Acceleration Service.
- * URL: https://github.com/elegant-h2020/Elegant-Acceleration-Service.git
+ * URL: https://github.com/stratika/elegant-acceleration-service
  *
  * Copyright (c) 2022, APT Group, Department of Computer Science,
  * The University of Manchester. All rights reserved.
@@ -17,30 +17,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.manchester.acceleration.service.elegant.controller;
+package uk.ac.manchester.elegant.acceleration.service.api;
 
-public class ParameterInfo {
-    private String[] keys;
-    private int[] values;
+import jakarta.ws.rs.ApplicationPath;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
-    public ParameterInfo(String[] keys, int[] values) {
-        this.keys = keys;
-        this.values = values;
+@ApplicationPath("/api")
+public class ElegantAccelerationApplication extends ResourceConfig {
+    public ElegantAccelerationApplication() {
+        super(ElegantAccelerationService.class, MultiPartFeature.class);
     }
 
-    public String[] getKeys() {
-        return keys;
-    }
-
-    public int[] getValues() {
-        return values;
-    }
-
-    public void setKeys(String[] keys) {
-        this.keys = keys;
-    }
-
-    public void setValues(int[] values) {
-        this.values = values;
-    }
 }

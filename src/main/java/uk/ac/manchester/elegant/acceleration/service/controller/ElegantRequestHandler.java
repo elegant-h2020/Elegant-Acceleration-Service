@@ -17,12 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.manchester.acceleration.service.elegant.controller;
+package uk.ac.manchester.elegant.acceleration.service.controller;
 
-import uk.ac.manchester.acceleration.service.elegant.tools.LinuxTornadoVM;
+import uk.ac.manchester.elegant.acceleration.service.tools.LinuxTornadoVM;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
