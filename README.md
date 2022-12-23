@@ -42,12 +42,6 @@ wget 'https://www.eclipse.org/downloads/download.php?file=/ee4j/glassfish/glassf
 unzip glassfish-6.0.0.zip
 cd ~/glassfish6
 echo "AS_JAVA=/usr/lib/jvm/openjdk-8u222-b10" >> ./glassfish/config/asenv.conf
-
-
-$ wget 'https://www.eclipse.org/downloads/download.php?file=/glassfish/glassfish-5.1.0.zip&r=1' -O glassfish-5.1.0.zip
-$ unzip glassfish-5.1.0.zip
-$ cd glassfish5
-$ echo "AS_JAVA=<path-to-JDK8>" >> ./glassfish/config/asenv.conf
 ```
 
 ### Initialize the environment and deploy the local server
@@ -65,15 +59,15 @@ b) Start GlassFish local server:
 $GLASSFISH_HOME/asadmin start-domain domain1
 ```
 
-c) Stop GlassFish local server:
+c) Redeploy the local server to sync with latest service (if the service is modified):
+```bash
+$GLASSFISH_HOME/asadmin deploy --force=true $SERVICE_HOME/target/ElegantAccelerationService-1.0-SNAPSHOT.war
+```
+
+d) Stop GlassFish local server:
 
 ```bash
 $GLASSFISH_HOME/asadmin stop-domain domain1
-```
-
-d) Redeploy the local server to sync with latest service (if the service is modified):
-```bash
-$GLASSFISH_HOME/asadmin deploy --force=true $SERVICE_HOME/target/ElegantAccelerationService-1.0-SNAPSHOT.war
 ```
 
 ### 5. Run an example of POST/GET requests from the terminal and from the path of the repository since the examples use relative paths:
