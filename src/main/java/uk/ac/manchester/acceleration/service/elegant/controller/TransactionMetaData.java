@@ -19,7 +19,7 @@
  */
 package uk.ac.manchester.acceleration.service.elegant.controller;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 public class TransactionMetaData {
     private CompilationRequest compilationRequest;

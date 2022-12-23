@@ -21,8 +21,8 @@ package uk.ac.manchester.acceleration.service.elegant.controller;
 
 import uk.ac.manchester.acceleration.service.elegant.tools.LinuxTornadoVM;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

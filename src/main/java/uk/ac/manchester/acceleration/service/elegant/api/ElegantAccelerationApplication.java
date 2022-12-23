@@ -19,10 +19,14 @@
  */
 package uk.ac.manchester.acceleration.service.elegant.api;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 @ApplicationPath("/api")
-public class ElegantAccelerationApplication extends Application {
+public class ElegantAccelerationApplication extends ResourceConfig {
+    public ElegantAccelerationApplication() {
+        super(ElegantAccelerationService.class, MultiPartFeature.class);
+    }
 
 }
