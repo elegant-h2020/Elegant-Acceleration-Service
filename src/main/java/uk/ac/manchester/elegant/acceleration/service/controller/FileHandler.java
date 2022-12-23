@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.manchester.acceleration.service.elegant.controller;
+package uk.ac.manchester.elegant.acceleration.service.controller;
 
 import jakarta.ws.rs.WebApplicationException;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -27,7 +27,6 @@ import org.json.simple.parser.JSONParser;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,17 +38,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
-public class ElegantFileHandler {
-
-    /**
-     * The default buffer size
-     */
-    public static final int DEFAULT_BUFFER_SIZE = 8192;
+public class FileHandler {
 
     private static String fileUploadedPath;
 
     public static void setFileUploadedPath(String fileUploadedPath) {
-        ElegantFileHandler.fileUploadedPath = fileUploadedPath;
+        FileHandler.fileUploadedPath = fileUploadedPath;
     }
 
     private static CompilationRequest parseJsonFileToCompilationRequest(String fileName) {
@@ -136,16 +130,6 @@ public class ElegantFileHandler {
             e.printStackTrace();
         }
         return null;
-    }
-
-    private static void writeInputStreamToFile(InputStream inputStream, File file) throws IOException {
-        try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
-            int read;
-            byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
-            while ((read = inputStream.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, read);
-            }
-        }
     }
 
     private static String resolveUploadedDirectory(long id) {
@@ -242,7 +226,7 @@ public class ElegantFileHandler {
         }
     }
 
-    public static CompilationRequest receiveRequest(String codeFile, String jsonFile) {
+    public static CompilationRequest receiveRequest(String jsonFile) {
         CompilationRequest compilationRequest = null;
         if (jsonFile.contains(".json")) {
             File file = new File(fileUploadedPath + File.separator + jsonFile);

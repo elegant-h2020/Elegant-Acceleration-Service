@@ -1,4 +1,4 @@
-package uk.ac.manchester.acceleration.service.elegant.controller;
+package uk.ac.manchester.elegant.acceleration.service.controller;
 
 import java.util.Arrays;
 

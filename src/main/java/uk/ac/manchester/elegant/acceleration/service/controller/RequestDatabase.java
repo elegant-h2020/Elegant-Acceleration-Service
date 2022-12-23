@@ -1,6 +1,6 @@
 /*
  * This file is part of the ELEGANT Acceleration Service.
- * URL: https://github.com/stratika/elegant-acceleration-service
+ * URL: https://github.com/elegant-h2020/Elegant-Acceleration-Service.git
  *
  * Copyright (c) 2022, APT Group, Department of Computer Science,
  * The University of Manchester. All rights reserved.
@@ -17,16 +17,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.manchester.acceleration.service.elegant.api;
+package uk.ac.manchester.elegant.acceleration.service.controller;
 
-import jakarta.ws.rs.ApplicationPath;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-@ApplicationPath("/api")
-public class ElegantAccelerationApplication extends ResourceConfig {
-    public ElegantAccelerationApplication() {
-        super(ElegantAccelerationService.class, MultiPartFeature.class);
+public class RequestDatabase {
+    // TODO: investigate concurrency issues
+    private static ConcurrentHashMap<Long, CompilationRequest> requests = new ConcurrentHashMap<>();
+
+    public static Map<Long, CompilationRequest> getRequests() {
+        return requests;
     }
-
 }

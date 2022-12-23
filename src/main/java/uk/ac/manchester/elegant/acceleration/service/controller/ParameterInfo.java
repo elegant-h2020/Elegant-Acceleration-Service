@@ -17,16 +17,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.manchester.acceleration.service.elegant.controller;
+package uk.ac.manchester.elegant.acceleration.service.controller;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+public class ParameterInfo {
+    private String[] keys;
+    private int[] values;
 
-public class RequestDatabase {
-    // TODO: investigate concurrency issues
-    private static ConcurrentHashMap<Long, CompilationRequest> requests = new ConcurrentHashMap<>();
+    public ParameterInfo(String[] keys, int[] values) {
+        this.keys = keys;
+        this.values = values;
+    }
 
-    public static Map<Long, CompilationRequest> getRequests() {
-        return requests;
+    public String[] getKeys() {
+        return keys;
+    }
+
+    public int[] getValues() {
+        return values;
+    }
+
+    public void setKeys(String[] keys) {
+        this.keys = keys;
+    }
+
+    public void setValues(int[] values) {
+        this.values = values;
     }
 }

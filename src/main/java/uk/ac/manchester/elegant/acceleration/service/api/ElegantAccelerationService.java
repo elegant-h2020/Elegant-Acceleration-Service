@@ -17,20 +17,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.manchester.acceleration.service.elegant.api;
+package uk.ac.manchester.elegant.acceleration.service.api;
 
 import jakarta.ws.rs.*;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import uk.ac.manchester.acceleration.service.elegant.controller.ElegantRequestHandler;
-import uk.ac.manchester.acceleration.service.elegant.controller.CompilationRequest;
-import uk.ac.manchester.acceleration.service.elegant.controller.ElegantFileHandler;
-import uk.ac.manchester.acceleration.service.elegant.controller.EnvironmentVariables;
-import uk.ac.manchester.acceleration.service.elegant.controller.TransactionMetaData;
-import uk.ac.manchester.acceleration.service.elegant.tools.LinuxTornadoVM;
+import uk.ac.manchester.elegant.acceleration.service.controller.ElegantRequestHandler;
+import uk.ac.manchester.elegant.acceleration.service.controller.CompilationRequest;
+import uk.ac.manchester.elegant.acceleration.service.controller.FileHandler;
+import uk.ac.manchester.elegant.acceleration.service.controller.EnvironmentVariables;
+import uk.ac.manchester.elegant.acceleration.service.controller.TransactionMetaData;
+import uk.ac.manchester.elegant.acceleration.service.tools.LinuxTornadoVM;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,7 +53,7 @@ public class ElegantAccelerationService {
         if (OS.contains("linux")) {
             tornadoVM = new LinuxTornadoVM();
             ElegantRequestHandler.setFileGeneratedPath(tornadoVM.getEnvironmentVariable(EnvironmentVariables.GENERATED_KERNELS_DIR));
-            ElegantFileHandler.setFileUploadedPath(tornadoVM.getEnvironmentVariable(EnvironmentVariables.UPLOADED_DIR));
+            FileHandler.setFileUploadedPath(tornadoVM.getEnvironmentVariable(EnvironmentVariables.UPLOADED_DIR));
         } else {
             throw new UnsupportedOperationException("The Acceleration Service is not supported for " + OS + ".");
         }
@@ -116,9 +117,9 @@ public class ElegantAccelerationService {
         TransactionMetaData transactionMetaData = null;
         String msg = "Accepted request. Files uploaded.";
 
-        String codeFileUploadedPath = ElegantFileHandler.uploadFile(codeFileInputStream, codeFileMetaData);
-        String jsonFileUploadedPath = ElegantFileHandler.uploadFile(jsonFileInputStream, jsonFileMetaData);
-        CompilationRequest compilationRequest = ElegantFileHandler.receiveRequest(codeFileMetaData.getFileName(), jsonFileMetaData.getFileName());
+        String codeFileUploadedPath = FileHandler.uploadFile(codeFileInputStream, codeFileMetaData);
+        String jsonFileUploadedPath = FileHandler.uploadFile(jsonFileInputStream, jsonFileMetaData);
+        CompilationRequest compilationRequest = FileHandler.receiveRequest(jsonFileMetaData.getFileName());
 
         if (compilationRequest == null) {
             msg = "Problem with uploaded files. See server log for more detail.";
@@ -130,7 +131,7 @@ public class ElegantAccelerationService {
         if (transactionMetaData.getCompilationRequest() != null) {
             long uid = ElegantRequestHandler.incrementAndGetUid();
             transactionMetaData.getCompilationRequest().setId(uid);
-            ElegantFileHandler.generateInternalJsonFiles(transactionMetaData);
+            FileHandler.generateInternalJsonFiles(transactionMetaData);
             ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
             ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
             ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
@@ -156,17 +157,17 @@ public class ElegantAccelerationService {
         String msg = "Accepted request. Files uploaded.";
 
         // Remove existing files related to requestId
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFileInfoJsonFileName(requestId));
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+        FileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
+        FileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
+        FileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
+        FileHandler.removeFile(ElegantRequestHandler.getUploadedFileInfoJsonFileName(requestId));
+        FileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
         ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
 
         // Upload new files
-        String codeFileUploadedPath = ElegantFileHandler.uploadFile(codeFileInputStream, codeFileMetaData);
-        String jsonFileUploadedPath = ElegantFileHandler.uploadFile(jsonFileInputStream, jsonFileMetaData);
-        CompilationRequest compilationRequest = ElegantFileHandler.receiveRequest(codeFileMetaData.getFileName(), jsonFileMetaData.getFileName());
+        String codeFileUploadedPath = FileHandler.uploadFile(codeFileInputStream, codeFileMetaData);
+        String jsonFileUploadedPath = FileHandler.uploadFile(jsonFileInputStream, jsonFileMetaData);
+        CompilationRequest compilationRequest = FileHandler.receiveRequest(jsonFileMetaData.getFileName());
 
         if (compilationRequest == null) {
             msg = "Problem with uploaded files. See server log for more detail.";
@@ -176,7 +177,7 @@ public class ElegantAccelerationService {
 
             // Update and trigger execution of request
             transactionMetaData.getCompilationRequest().setId(requestId);
-            ElegantFileHandler.generateInternalJsonFiles(transactionMetaData);
+            FileHandler.generateInternalJsonFiles(transactionMetaData);
             ElegantRequestHandler.updateRequest(transactionMetaData.getCompilationRequest());
             ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
             ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
@@ -191,13 +192,13 @@ public class ElegantAccelerationService {
     @Path("/{requestId}")
     @Produces(MediaType.APPLICATION_JSON)
     public CompilationRequest delete(@PathParam("requestId") long requestId) {
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFileInfoJsonFileName(requestId));
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
-        ElegantFileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
-        ElegantFileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+        FileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
+        FileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
+        FileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
+        FileHandler.removeFile(ElegantRequestHandler.getUploadedFileInfoJsonFileName(requestId));
+        FileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+        FileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
+        FileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
 
         ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
         ElegantRequestHandler.removeUploadedFileNames(requestId);

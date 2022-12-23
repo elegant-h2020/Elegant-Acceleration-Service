@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.manchester.acceleration.service.elegant.controller;
+package uk.ac.manchester.elegant.acceleration.service.controller;
 
 import jakarta.ws.rs.core.Response;
 
