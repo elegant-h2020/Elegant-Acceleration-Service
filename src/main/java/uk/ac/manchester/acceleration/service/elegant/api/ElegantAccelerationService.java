@@ -19,6 +19,7 @@
  */
 package uk.ac.manchester.acceleration.service.elegant.api;
 
+import jakarta.ws.rs.*;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import uk.ac.manchester.acceleration.service.elegant.controller.ElegantRequestHandler;
@@ -28,13 +29,6 @@ import uk.ac.manchester.acceleration.service.elegant.controller.EnvironmentVaria
 import uk.ac.manchester.acceleration.service.elegant.controller.TransactionMetaData;
 import uk.ac.manchester.acceleration.service.elegant.tools.LinuxTornadoVM;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.File;
@@ -149,7 +143,7 @@ public class ElegantAccelerationService {
 
     }
 
-    @POST
+    @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/{requestId}/resubmit")

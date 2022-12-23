@@ -31,7 +31,7 @@ GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/accelerati
 ###
 
 # curl -X POST -H "Content-Type: multipart/form-data" -F "codeFile=@examples/inputFiles/vectorAdd2.java" -F "jsonFile=@examples/inputFiles/deviceInfoJava2.json" http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/resubmit
-POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/resubmit
+PUT http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/resubmit
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
