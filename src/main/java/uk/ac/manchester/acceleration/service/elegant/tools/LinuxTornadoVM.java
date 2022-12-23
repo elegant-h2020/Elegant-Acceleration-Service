@@ -29,14 +29,15 @@ public class LinuxTornadoVM implements TornadoVMInterface {
     }
 
     @Override
-    public void initializeEnvironment() {
+    public void initializeEnvironment() { // FIXME: Update paths to be generic
         environmentTornadoVM = tornadoVMProcessBuilder.environment();
         environmentTornadoVM.put(EnvironmentVariables.JAVA_HOME, "/home/thanos/installation/graalvm-ce-java11-22.2.0");
-        environmentTornadoVM.put(EnvironmentVariables.SERVICE_DIR, "/home/thanos/repositories/Elegant-Acceleration-Service");
-        environmentTornadoVM.put(EnvironmentVariables.TORNADOVM_DIR, "/home/thanos/repositories/tornadoVM2");
-        environmentTornadoVM.put(EnvironmentVariables.TORNADO_SDK, "/home/thanos/repositories/tornadoVM2/bin/sdk");
-        environmentTornadoVM.put(EnvironmentVariables.GENERATED_KERNELS_DIR, "/home/thanos/repositories/Elegant-Acceleration-Service/examples/generated");
-        environmentTornadoVM.put(EnvironmentVariables.BOILERPLATE_DIR, "/home/thanos/repositories/Elegant-Acceleration-Service/examples/boilerplate/");
+        environmentTornadoVM.put(EnvironmentVariables.SERVICE_DIR, "/home/thanos/repositories/Elegant/Elegant-Acceleration-Service");
+        environmentTornadoVM.put(EnvironmentVariables.TORNADOVM_DIR, "/home/thanos/repositories/TornadoVM-Internal");
+        environmentTornadoVM.put(EnvironmentVariables.TORNADO_SDK, "/home/thanos/repositories/TornadoVM-Internal/bin/sdk");
+        environmentTornadoVM.put(EnvironmentVariables.UPLOADED_DIR, "/home/thanos/repositories/Elegant/Elegant-Acceleration-Service/examples/uploaded");
+        environmentTornadoVM.put(EnvironmentVariables.GENERATED_KERNELS_DIR, "/home/thanos/repositories/Elegant/Elegant-Acceleration-Service/examples/generated");
+        environmentTornadoVM.put(EnvironmentVariables.BOILERPLATE_DIR, "/home/thanos/repositories/Elegant/Elegant-Acceleration-Service/examples/boilerplate/");
     }
 
     @Override
@@ -48,7 +49,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         ArrayList<String> args = new ArrayList<>();
         args.add(environmentTornadoVM.get(EnvironmentVariables.JAVA_HOME) + "/bin/javac");
         args.add("-cp");
-        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_DIR) + "/dist/tornado-sdk/tornado-sdk-0.15-dev-afef0d5/share/java/tornado/tornado-api-0.15-dev.jar");
+        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_DIR) + "/dist/tornado-sdk/tornado-sdk-0.15-dev-04f4353/share/java/tornado/tornado-api-0.15-dev.jar");
         args.add("-g:vars");
         args.add(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id + "/" + ClassGenerator.getVirtualClassFileName(methodFileName));
         return args.toArray(new String[args.size()]);
@@ -59,6 +60,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         String classpath = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id;
         String classFile = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + id + File.separator + ClassGenerator.getVirtualClassName(methodFileName) + ".class";
         args.add(environmentTornadoVM.get(EnvironmentVariables.SERVICE_DIR) + "/bin/runCompilation.sh");
+        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADO_SDK) + "/bin/tornado");
         args.add(classpath);
         args.add(classFile);
         args.add(deviceDescriptionJsonFileName);
