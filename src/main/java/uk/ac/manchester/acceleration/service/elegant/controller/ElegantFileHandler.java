@@ -19,18 +19,12 @@
  */
 package uk.ac.manchester.acceleration.service.elegant.controller;
 
-import org.apache.tomcat.util.http.fileupload.FileItemFactory;
-import org.apache.tomcat.util.http.fileupload.FileItemIterator;
-import org.apache.tomcat.util.http.fileupload.FileItemStream;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import jakarta.ws.rs.WebApplicationException;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Response;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,6 +32,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,7 +46,11 @@ public class ElegantFileHandler {
      */
     public static final int DEFAULT_BUFFER_SIZE = 8192;
 
-    private static final String FILE_UPLOAD_PATH = "/home/thanos/repositories/Elegant-Acceleration-Service/examples/uploaded";
+    private static String fileUploadedPath;
+
+    public static void setFileUploadedPath(String fileUploadedPath) {
+        ElegantFileHandler.fileUploadedPath = fileUploadedPath;
+    }
 
     private static CompilationRequest parseJsonFileToCompilationRequest(String fileName) {
         JSONParser parser = new JSONParser();
@@ -150,7 +149,7 @@ public class ElegantFileHandler {
     }
 
     private static String resolveUploadedDirectory(long id) {
-        File idDirectory = new File(FILE_UPLOAD_PATH + File.separator + id);
+        File idDirectory = new File(fileUploadedPath + File.separator + id);
         if (!idDirectory.exists()) {
             idDirectory.mkdirs();
         }
@@ -218,56 +217,40 @@ public class ElegantFileHandler {
         }
     }
 
-    public static TransactionMetaData iterateAndParseUploadFilesFromRequest(HttpServletRequest request) {
-        CompilationRequest compilationRequest = null;
-        int code = 200;
-        String msg = "Files uploaded.";
-        String functionFileName = null;
-        String jsonFileName = null;
-        FileItemFactory factory = new DiskFileItemFactory();
-        ServletFileUpload fileUpload = new ServletFileUpload(factory);
+    /**
+     * Receives and stores a file in $SERVICE_HOME/examples/uploaded and returns its absolute path as String.
+     * @param fileInputStream
+     * @param fileMetaData
+     *
+     * @return String
+     */
+    public static String uploadFile(InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
         try {
-            if (request != null) {
-                FileItemIterator iter = fileUpload.getItemIterator(request);
-                while (iter.hasNext()) {
-                    final FileItemStream item = iter.next();
-                    final String itemName = item.getName();
-                    if (!item.isFormField()) {
-                        final File file = new File(FILE_UPLOAD_PATH + File.separator + itemName);
-                        File dir = file.getParentFile();
-                        if (!dir.exists()) {
-                            dir.mkdir();
-                        }
-
-                        // TODO: Append date in the name of new files
-                        if (file.exists()) {
-                            file.delete();
-                            file.createNewFile();
-                        }
-
-                        try (InputStream stream = item.openStream()) {
-                            writeInputStreamToFile(stream, file);
-                        }
-                        if (itemName.contains(".json")) {
-                            compilationRequest = parseJsonFileToCompilationRequest(file.getAbsolutePath());
-                            jsonFileName = FILE_UPLOAD_PATH + File.separator + itemName;
-                        } else if (itemName.contains(".java") || itemName.contains(".cpp") || itemName.contains(".c")) {
-                            functionFileName = FILE_UPLOAD_PATH + File.separator + itemName;
-                        }
-                    }
-                }
+            int read = 0;
+            byte[] bytes = new byte[1024];
+            String fileName = fileMetaData.getFileName();
+            final File file = new File(fileUploadedPath + File.separator + fileName);
+            OutputStream out = Files.newOutputStream(file.toPath());
+            while ((read = fileInputStream.read(bytes)) != -1) {
+                out.write(bytes, 0, read);
             }
-        } catch (FileUploadException e) {
-            code = 404;
-            msg = e.getMessage();
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-            code = 404;
-            msg = e.getMessage();
+            out.flush();
+            out.close();
+            return file.getAbsolutePath();
+        } catch (IOException e) {
+            throw new WebApplicationException("Error while uploading file. Please try again !!");
         }
-        TransactionMetaData transactionMetaData = new TransactionMetaData(compilationRequest, functionFileName, jsonFileName, null, Response.status(code).entity(msg).build());
-        return transactionMetaData;
+    }
+
+    public static CompilationRequest receiveRequest(String codeFile, String jsonFile) {
+        CompilationRequest compilationRequest = null;
+        if (jsonFile.contains(".json")) {
+            File file = new File(fileUploadedPath + File.separator + jsonFile);
+            compilationRequest = parseJsonFileToCompilationRequest(file.getAbsolutePath());
+        } else {
+            return null;
+        }
+        return compilationRequest;
     }
 
     public static void removeFile(String fileName) {
