@@ -30,8 +30,9 @@ mv /usr/lib/jvm/openjdk-8u222-b10 /usr/lib/jvm/java-8-openjdk-amd64
 
 - Install TornadoVM. We have tested it with GraalVM JDK 11 and OpenCL
 ```bash
-git clone https://github.com/beehive-lab/TornadoVM.git
+git clone https://github.com/elegant-h2020/TornadoVM.git
 cd TornadoVM
+git checkout feat/service
 ./scripts/tornadoVMInstaller.sh --graal-jdk-11 --opencl
 source source.sh
 cd ..
