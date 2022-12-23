@@ -1,5 +1,6 @@
 /target/
 .idea/*
+.run/*
 *.iml
 /examples/uploaded/*
 /examples/boilerplate/*
