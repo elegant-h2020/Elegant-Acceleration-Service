@@ -163,9 +163,11 @@ public class ElegantAccelerationService {
 
         // Remove existing files related to requestId
         ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
-        ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
         ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
         ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFileInfoJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+        ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
 
         // Upload new files
         String codeFileUploadedPath = ElegantFileHandler.uploadFile(codeFileInputStream, codeFileMetaData);
