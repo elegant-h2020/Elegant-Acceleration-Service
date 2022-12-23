@@ -1,0 +1,20 @@
+{
+  "fileInfo": {
+    "functionName": "vectorAdd2",
+    "programmingLanguage": "Java"
+  },
+  "parameterSizes": {
+    "a": 1024,
+    "b": 1024,
+    "c": 1024
+  },
+  "deviceInfo": {
+    "deviceName": "Nvidia GPU",
+    "doubleFPSupport": true,
+    "maxWorkItemSizes": [16, 1, 1],
+    "deviceAddressBits": 64,
+    "deviceType": "CL_DEVICE_TYPE_GPU",
+    "deviceExtensions": "cl_khr_int64_base_atomics",
+    "availableProcessors": 2048
+  }
+}
