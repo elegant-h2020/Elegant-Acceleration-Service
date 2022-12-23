@@ -3,19 +3,15 @@
     "functionName": "vectorAdd",
     "programmingLanguage": "C++"
   },
-  "parameters": {
-    "a": "1024",
-    "b": "1024",
-    "c": "1024"
+  "parameterSizes": {
+    "a": 1024,
+    "b": 1024,
+    "c": 1024
   },
   "deviceInfo": {
     "deviceName": "Nvidia GPU 1",
     "doubleFPSupport": true,
-    "maxWorkItems": {
-      "dim1": 32,
-      "dim2": 1,
-      "dim3": 1
-    },
+    "maxWorkItemSizes": [16, 1, 1],
     "deviceAddressBits": 64,
     "deviceType": "CL_DEVICE_TYPE_GPU",
     "deviceExtensions": "cl_khr_int64_base_atomics",

@@ -19,31 +19,43 @@
  */
 package uk.ac.manchester.acceleration.service.elegant.api;
 
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import jakarta.ws.rs.*;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import uk.ac.manchester.acceleration.service.elegant.controller.ElegantRequestHandler;
 import uk.ac.manchester.acceleration.service.elegant.controller.CompilationRequest;
 import uk.ac.manchester.acceleration.service.elegant.controller.ElegantFileHandler;
+import uk.ac.manchester.acceleration.service.elegant.controller.EnvironmentVariables;
 import uk.ac.manchester.acceleration.service.elegant.controller.TransactionMetaData;
+import uk.ac.manchester.acceleration.service.elegant.tools.LinuxTornadoVM;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
-@Path("/acceleration/requests")
+@Path("/acceleration")
 public class ElegantAccelerationService {
 
-    public ElegantAccelerationService() {
+    private static LinuxTornadoVM tornadoVM;
 
+    private static final String OS = System.getProperty("os.name").toLowerCase();
+
+    public ElegantAccelerationService() throws IOException {
+        newTornadoVMInstance();
+        // tornadoVM.buildTornadoVM();
+    }
+
+    private void newTornadoVMInstance() {
+        if (OS.contains("linux")) {
+            tornadoVM = new LinuxTornadoVM();
+            ElegantRequestHandler.setFileGeneratedPath(tornadoVM.getEnvironmentVariable(EnvironmentVariables.GENERATED_KERNELS_DIR));
+            ElegantFileHandler.setFileUploadedPath(tornadoVM.getEnvironmentVariable(EnvironmentVariables.UPLOADED_DIR));
+        } else {
+            throw new UnsupportedOperationException("The Acceleration Service is not supported for " + OS + ".");
+        }
     }
 
     @GET
@@ -57,7 +69,7 @@ public class ElegantAccelerationService {
     @Produces(MediaType.APPLICATION_JSON)
     public CompilationRequest retrieveRequest(@PathParam("requestId") long requestId) {
         System.out.println("The generated kernelFileName for request [" + requestId + "] of code is: " + ElegantRequestHandler.getGeneratedKernelFileName(requestId));
-        System.out.println("The uploaded jsonFileName for request [" + requestId + "] of code is: " + ElegantRequestHandler.getUploadedJsonFileName(requestId));
+        System.out.println("The uploaded jsonFileName for request [" + requestId + "] of code is: " + ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
         return ElegantRequestHandler.getRequest(requestId); // TODO Avoid creating an object. Use the class name and make methods static.
     }
 
@@ -71,7 +83,7 @@ public class ElegantAccelerationService {
             response.header("Content-Disposition", "attachment;filename=" + ElegantRequestHandler.getFileNameOfAccelerationCode(requestId));
             return response.build();
         } else {
-            return Response.status(404).entity("File not found.").build();
+            return Response.status(Response.Status.EXPECTATION_FAILED).entity("File not found.").build();
         }
     }
 
@@ -97,38 +109,81 @@ public class ElegantAccelerationService {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/submit")
-    public CompilationRequest uploadFile(@Context HttpServletRequest request) {
+    public Response uploadFile(@FormDataParam("codeFile") InputStream codeFileInputStream,
+                               @FormDataParam("codeFile") FormDataContentDisposition codeFileMetaData,
+                               @FormDataParam("jsonFile") InputStream jsonFileInputStream,
+                               @FormDataParam("jsonFile") FormDataContentDisposition jsonFileMetaData) throws IOException, InterruptedException {
         TransactionMetaData transactionMetaData = null;
-        if (ServletFileUpload.isMultipartContent(request)) {
-            transactionMetaData = ElegantFileHandler.iterateAndParseUploadFilesFromRequest(request);
-            if (transactionMetaData.getCompilationRequest() != null) {
-                long uid = ElegantRequestHandler.incrementAndGetUid();
-                transactionMetaData.getCompilationRequest().setId(uid);
-                ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
-                ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
-                ElegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
-                ElegantRequestHandler.compile(transactionMetaData);
-            }
+        String msg = "Accepted request. Files uploaded.";
+
+        String codeFileUploadedPath = ElegantFileHandler.uploadFile(codeFileInputStream, codeFileMetaData);
+        String jsonFileUploadedPath = ElegantFileHandler.uploadFile(jsonFileInputStream, jsonFileMetaData);
+        CompilationRequest compilationRequest = ElegantFileHandler.receiveRequest(codeFileMetaData.getFileName(), jsonFileMetaData.getFileName());
+
+        if (compilationRequest == null) {
+            msg = "Problem with uploaded files. See server log for more detail.";
+            transactionMetaData = new TransactionMetaData(compilationRequest, null, null, null, Response.status(Response.Status.BAD_REQUEST).entity(msg).build());
+        } else {
+            transactionMetaData = new TransactionMetaData(compilationRequest, codeFileUploadedPath, jsonFileUploadedPath, null, Response.status(Response.Status.ACCEPTED).entity(msg).build());
         }
-        return transactionMetaData.getCompilationRequest();
+
+        if (transactionMetaData.getCompilationRequest() != null) {
+            long uid = ElegantRequestHandler.incrementAndGetUid();
+            transactionMetaData.getCompilationRequest().setId(uid);
+            ElegantFileHandler.generateInternalJsonFiles(transactionMetaData);
+            ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
+            ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
+            ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
+            ElegantRequestHandler.addOrUpdateUploadedFileInfoFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFileInfoName());
+            ElegantRequestHandler.addOrUpdateUploadedParameterSizeJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getParameterSizeFileName());
+            ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
+        }
+
+        return transactionMetaData.response;
+
     }
 
-    @POST
-    @Path("/{requestId}/resubmit")
+    @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response updateAndCompile(@PathParam("requestId") long requestId, @Context HttpServletRequest request) {
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/{requestId}/resubmit")
+    public Response updateAndCompile(@PathParam("requestId") long requestId,
+                                     @FormDataParam("codeFile") InputStream codeFileInputStream,
+                                     @FormDataParam("codeFile") FormDataContentDisposition codeFileMetaData,
+                                     @FormDataParam("jsonFile") InputStream jsonFileInputStream,
+                                     @FormDataParam("jsonFile") FormDataContentDisposition jsonFileMetaData) throws IOException, InterruptedException {
         TransactionMetaData transactionMetaData = null;
-        if (ServletFileUpload.isMultipartContent(request)) {
-            ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
-            ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
-            ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedJsonFileName(requestId));
-            transactionMetaData = ElegantFileHandler.iterateAndParseUploadFilesFromRequest(request);
+        String msg = "Accepted request. Files uploaded.";
+
+        // Remove existing files related to requestId
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFileInfoJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+        ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
+
+        // Upload new files
+        String codeFileUploadedPath = ElegantFileHandler.uploadFile(codeFileInputStream, codeFileMetaData);
+        String jsonFileUploadedPath = ElegantFileHandler.uploadFile(jsonFileInputStream, jsonFileMetaData);
+        CompilationRequest compilationRequest = ElegantFileHandler.receiveRequest(codeFileMetaData.getFileName(), jsonFileMetaData.getFileName());
+
+        if (compilationRequest == null) {
+            msg = "Problem with uploaded files. See server log for more detail.";
+            transactionMetaData = new TransactionMetaData(compilationRequest, null, null, null, Response.status(Response.Status.BAD_REQUEST).entity(msg).build());
+        } else {
+            transactionMetaData = new TransactionMetaData(compilationRequest, codeFileUploadedPath, jsonFileUploadedPath, null, Response.status(Response.Status.ACCEPTED).entity(msg).build());
+
+            // Update and trigger execution of request
             transactionMetaData.getCompilationRequest().setId(requestId);
+            ElegantFileHandler.generateInternalJsonFiles(transactionMetaData);
             ElegantRequestHandler.updateRequest(transactionMetaData.getCompilationRequest());
             ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
-            ElegantRequestHandler.addOrUpdateUploadedJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
-            ElegantRequestHandler.compile(transactionMetaData);
+            ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
+            ElegantRequestHandler.addOrUpdateUploadedParameterSizeJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getParameterSizeFileName());
+            ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
         }
+
         return transactionMetaData.response;
     }
 
@@ -137,10 +192,15 @@ public class ElegantAccelerationService {
     @Produces(MediaType.APPLICATION_JSON)
     public CompilationRequest delete(@PathParam("requestId") long requestId) {
         ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedFileInfoJsonFileName(requestId));
+        ElegantFileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+        ElegantFileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(requestId));
+        ElegantFileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+
         ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
-        ElegantFileHandler.removeFile(ElegantRequestHandler.getUploadedJsonFileName(requestId));
-        ElegantRequestHandler.removeUploadedFunctionFileName(requestId);
-        ElegantRequestHandler.removeUploadedJsonFileName(requestId);
+        ElegantRequestHandler.removeUploadedFileNames(requestId);
         return ElegantRequestHandler.removeRequest(requestId);
     }
 }

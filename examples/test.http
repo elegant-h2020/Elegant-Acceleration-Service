@@ -1,98 +1,52 @@
 ###
-POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/submit
-Accept: multipart/form-data
-Content-Type: multipart/form-data; boundary=abcd
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/count
+#
 
---abcd
-Content-Disposition: form-data; name="vectorAdd"; filename="vectorAdd.java"
+###
+
+# curl -X POST -H "Content-Type: multipart/form-data" -F "codeFile=@examples/inputFiles/vectorAdd.java" -F "jsonFile=@examples/inputFiles/deviceInfoJava.json" http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/submit
+POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/submit
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="codeFile"; filename="vectorAdd.java"
 
 < ./inputFiles/vectorAdd.java
---abcd
-Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo.json"
+--WebAppBoundary
+Content-Disposition: form-data; name="jsonFile"; filename="deviceInfoJava.json"
 
-< ./inputFiles/deviceInfo.json
+< ./inputFiles/deviceInfoJava.json
+--WebAppBoundary--
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/count
+
+###
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/retrieve
 #
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/info
+GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/state
 #
 
 ###
-POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/resubmit
-Accept: multipart/form-data
-Content-Type: multipart/form-data; boundary=abcd
 
---abcd
-Content-Disposition: form-data; name="vectorAdd"; filename="vectorAdd.cpp"
+# curl -X PUT -H "Content-Type: multipart/form-data" -F "codeFile=@examples/inputFiles/vectorAdd2.java" -F "jsonFile=@examples/inputFiles/deviceInfoJava2.json" http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/resubmit
+PUT http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/resubmit
+Content-Type: multipart/form-data; boundary=WebAppBoundary
 
-< ./inputFiles/vectorAdd.cpp
---abcd
-Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo2.json"
+--WebAppBoundary
+Content-Disposition: form-data; name="codeFile"; filename="vectorAdd2.java"
 
-< ./inputFiles/deviceInfo2.json
+< ./inputFiles/vectorAdd2.java
+--WebAppBoundary
+Content-Disposition: form-data; name="jsonFile"; filename="deviceInfoJava2.json"
+
+< ./inputFiles/deviceInfoJava2.json
+--WebAppBoundary--
 
 ###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/info
+
+###
+DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1
 #
 
-###
-POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/submit
-Accept: multipart/form-data
-Content-Type: multipart/form-data; boundary=abcd
-
---abcd
-Content-Disposition: form-data; name="vectorAdd"; filename="vectorAdd.java"
-
-< ./inputFiles/vectorAdd.java
---abcd
-Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo.json"
-
-< ./inputFiles/deviceInfo.json
-
-###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests
-#
-
-###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/retrieve
-#
-
-###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2/retrieve
-#
-
-###
-DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/2
-
-###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/retrieve
-#
-
-###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/state
-#
-
-###
-POST http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/resubmit
-Accept: multipart/form-data
-Content-Type: multipart/form-data; boundary=abcd
-
---abcd
-Content-Disposition: form-data; name="vectorAdd"; filename="vectorAdd.java"
-
-< ./inputFiles/vectorAdd.java
---abcd
-Content-Disposition: form-data; name="deviceInfo"; filename="deviceInfo.json"
-
-< ./inputFiles/deviceInfo.json
-
-###
-DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1
-#
-
-###
-GET http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/count
-#

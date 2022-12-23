@@ -19,20 +19,23 @@
  */
 package uk.ac.manchester.acceleration.service.elegant.controller;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 public class TransactionMetaData {
     private CompilationRequest compilationRequest;
     private String functionFileName;
     private String jsonFileName;
+    private String fileInfoName;
+    private String parameterSizeFileName;
 
     public Response response;
 
-    public TransactionMetaData(CompilationRequest compilationRequest, String functionFileName, String jsonFileName, Response response) {
+    public TransactionMetaData(CompilationRequest compilationRequest, String functionFileName, String jsonFileName, String fileInfoName, Response response) {
         this.compilationRequest = compilationRequest;
 
         this.functionFileName = functionFileName;
         this.jsonFileName = jsonFileName;
+        this.fileInfoName = fileInfoName;
         this.response = response;
     }
 
@@ -58,5 +61,21 @@ public class TransactionMetaData {
 
     public void setJsonFileName(String jsonFileName) {
         this.jsonFileName = jsonFileName;
+    }
+
+    public String getParameterSizeFileName() {
+        return parameterSizeFileName;
+    }
+
+    public void setParameterSizeFileName(String parameterSizeFileName) {
+        this.parameterSizeFileName = parameterSizeFileName;
+    }
+
+    public String getFileInfoName() {
+        return fileInfoName;
+    }
+
+    public void setFileInfoName(String fileInfoName) {
+        this.fileInfoName = fileInfoName;
     }
 }

@@ -7,8 +7,8 @@ A web service that provides code that can run on hardware accelerators (e.g. GPU
 This project aims to build a RESTful API in Java that can submit requests for compilation of heterogeneous code that can
 run on hardware accelerators.
 
-The project uses JAX-RS to implement a portable API for the development, exposure, and accessing of the ELEGANT
-Acceleration Webservice.
+The project uses Jakarta to implement a portable API for the development, exposure, and accessing of the ELEGANT
+Acceleration Webservice. All dependencies are available in the [pom.xml](pom.xml) file.
 
 ## Installation
 
@@ -24,110 +24,133 @@ git clone https://github.com/elegant-h2020/Elegant-Acceleration-Service.git
 mvn clean install
 ```
 
-### 3. Deploy a GlassFish server
+### 3. Download JDK 8 and a GlassFish server
 
-a) Download GlassFish 5.1.0:
+#### Download JDK 8
+```bash
+wget --no-check-certificate -O /tmp/openjdk-8u222b10.tar.gz https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jdk_x64_linux_8u222b10.tar.gz
+tar xzvf /tmp/openjdk-8u222b10.tar.gz --directory /usr/lib/jvm/
+mv /usr/lib/jvm/openjdk-8u222-b10 /usr/lib/jvm/java-8-openjdk-amd64
+```
+
+
+#### Download GlassFish 6.0.0:
 
 ```bash
-$ wget 'https://www.eclipse.org/downloads/download.php?file=/glassfish/glassfish-5.1.0.zip&r=1' -O glassfish-5.1.0.zip
-$ unzip glassfish-5.1.0.zip
-$ cd glassfish5
-$ echo "AS_JAVA=<path-to-JDK8>" >> ./glassfish/config/asenv.conf
+cd ~
+wget 'https://www.eclipse.org/downloads/download.php?file=/ee4j/glassfish/glassfish-6.0.0.zip' -O glassfish-6.0.0.zip
+unzip glassfish-6.0.0.zip
+cd ~/glassfish6
+echo "AS_JAVA=/usr/lib/jvm/openjdk-8u222-b10" >> ./glassfish/config/asenv.conf
+```
+
+### Initialize the environment and deploy the local server
+
+a) Set environmental variables
+```bash
+export SERVICE_HOME=<path-to-repository>/Elegant-Acceleration-Service
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export GLASSFISH_HOME=~/glassfish6/glassfish/bin
 ```
 
 b) Start GlassFish local server:
 
 ```bash
-./bin/asadmin start-domain domain1
+$GLASSFISH_HOME/asadmin start-domain domain1
 ```
 
-c) Stop GlassFish local server:
+c) Redeploy the local server to sync with latest service (if the service is modified):
+```bash
+$GLASSFISH_HOME/asadmin deploy --force=true $SERVICE_HOME/target/ElegantAccelerationService-1.0-SNAPSHOT.war
+```
+
+d) Stop GlassFish local server:
 
 ```bash
-./bin/asadmin stop-domain domain1
+$GLASSFISH_HOME/asadmin stop-domain domain1
 ```
 
-### 4. Run an example of POST/GET requests from the terminal:
+### 5. Run an example of POST/GET requests from the terminal and from the path of the repository since the examples use relative paths:
 
 ```bash
-curl -F file=@./examples/inputFiles/vectorAdd.java -F file=@./examples/inputFiles/deviceInfo.json http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/submit
+curl -X POST -H "Content-Type: multipart/form-data" -F "codeFile=@examples/inputFiles/vectorAdd.java" -F "jsonFile=@examples/inputFiles/deviceInfoJava.json" http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/submit
 ```
 
-The response contains the input json file of the POST request, followed by an identifier:
-
+The response contains a message regarding the outcome, followed by an identifier:
 ```bash
-{"deviceInfo":{"availableProcessors":2048,"deviceAddressBits":64,"deviceExtensions":"cl_khr_int64_base_atomics","deviceName":"Nvidia GPU","deviceType":"CL_DEVICE_TYPE_GPU","doubleFPSupport":true,"maxWorkItems":{"dim1":16,"dim2":1,"dim3":1}},"fileInfo":{"functionName":"vectorAdd","programmingLanguage":"Java"},"id":1,"state":"SUBMITTED"}
+New code acceleration request has been registered (#1)
 ```
 
-The `id` identifier can be used to: i) update a request entry, ii) retrieve a GET request, or iii) the state of a
+The `id` identifier can be used to: i) update a request entry, ii) retrieve the compiled kernel via a GET request, or iii) the state of a
 request, as follows:
 
 #### A. To update a request (for example instead of a Java vectorAdd method to compile a C++ vectorAdd function):
 
 ```bash
-curl -F file=@./examples/inputFiles/vectorAdd.cpp -F file=@./examples/inputFiles/deviceInfo2.json http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/resubmit
+curl -X PUT -H "Content-Type: multipart/form-data" -F "codeFile=@examples/inputFiles/vectorAdd2.java" -F "jsonFile=@examples/inputFiles/deviceInfoJava2.json" http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/resubmit
 ```
 
 #### B. To retrieve the accelerated code:
 
 ```bash
-curl http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/retrieve
+curl http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/retrieve
 ```
 
 This request returns the accelerated code for request with `id` 1:
 
 ```bash
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-__kernel void add(__global long *_kernel_context, __constant uchar *_constant_region, __local uchar *_local_region, __global int *_atomics, __global uchar *a, __global uchar *b, __global uchar *c)
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable  
+#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable  
+__kernel void vectorAdd2(__global uchar *a, __global uchar *b, __global uchar *c)
 {
-  ulong ul_8, ul_10, ul_1, ul_0, ul_2, ul_12;
-  long l_5, l_7, l_6;
-  int i_11, i_9, i_15, i_14, i_13, i_3, i_4;
+  ulong ul_0, ul_1, ul_2, ul_7, ul_9, ul_11; 
+  long l_6, l_5; 
+  int i_3, i_4, i_13, i_14, i_12, i_10, i_8; 
 
   // BLOCK 0
-  ul_0  =  a;
-  ul_1  =  b;
-  ul_2  =  c;
+  ul_0  =  (ulong) a;
+  ul_1  =  (ulong) b;
+  ul_2  =  (ulong) c;
   i_3  =  get_global_id(0);
   // BLOCK 1 MERGES [0 2 ]
   i_4  =  i_3;
-  for(;i_4 < 8;)  {
+  for(;i_4 < 1024;)
+  {
     // BLOCK 2
     l_5  =  (long) i_4;
     l_6  =  l_5 << 2;
-    l_7  =  l_6 + 24L;
-    ul_8  =  ul_0 + l_7;
-    i_9  =  *((__global int *) ul_8);
-    ul_10  =  ul_1 + l_7;
-    i_11  =  *((__global int *) ul_10);
-    ul_12  =  ul_2 + l_7;
-    i_13  =  i_9 + i_11;
-    *((__global int *) ul_12)  =  i_13;
-    i_14  =  get_global_size(0);
-    i_15  =  i_14 + i_4;
-    i_4  =  i_15;
-  }
+    ul_7  =  ul_0 + l_6;
+    i_8  =  *((__global int *) ul_7);
+    ul_9  =  ul_1 + l_6;
+    i_10  =  *((__global int *) ul_9);
+    ul_11  =  ul_2 + l_6;
+    i_12  =  i_8 + i_10;
+    *((__global int *) ul_11)  =  i_12;
+    i_13  =  get_global_size(0);
+    i_14  =  i_13 + i_4;
+    i_4  =  i_14;
+  }  // B2
   // BLOCK 3
   return;
-}
+}  //  kernel
 ```
 
 #### C. To retrieve the state of the submitted request:
 
 ```bash
-curl http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/state
+curl http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/state
 ```
 
 This request returns the state of the request with `id` 1:
 
 ```bash
-"SUBMITTED"
+"COMPLETED"
 ```
 
-### 5. Run an example of DELETE request from the terminal:
+### 6. Run an example of DELETE request from the terminal:
 
 ```bash
-curl -X DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/requests/1/
+curl -X DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/1/
 ```
 
 ## Licenses

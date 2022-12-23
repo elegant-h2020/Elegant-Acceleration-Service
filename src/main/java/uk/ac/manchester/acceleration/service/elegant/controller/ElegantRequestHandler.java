@@ -19,7 +19,12 @@
  */
 package uk.ac.manchester.acceleration.service.elegant.controller;
 
+import uk.ac.manchester.acceleration.service.elegant.tools.LinuxTornadoVM;
+
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,18 +33,29 @@ import java.util.concurrent.atomic.AtomicLong;
 
 //TODO Make methods static
 public class ElegantRequestHandler {
-    private static final String FILE_GENERATED_PATH = "/home/thanos/repositories/Elegant-Acceleration-Service/examples/generated";
+
+    private static String fileGeneratedPath;
     private static Map<Long, CompilationRequest> requests = RequestDatabase.getRequests(); // TODO Connect with a database Spring MySQL, or other database, SQLLite
 
     // TODO Remove hashmaps and update the database functionality
     private static ConcurrentHashMap<Long, String> mapOfUploadedFunctionFileNames = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<Long, String> mapOfUploadedJsonFileNames = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, String> mapOfUploadedDeviceJsonFileNames = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, String> mapOfUploadedFileInfoJsonFileNames = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, String> mapOfUploadedParameterSizeFileNames = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Long, String> mapOfGeneratedKernelNames = new ConcurrentHashMap<>();
 
     private static AtomicLong uid = new AtomicLong(0);
 
     public static long incrementAndGetUid() {
         return uid.incrementAndGet();
+    }
+
+    public String getFileGeneratedPath() {
+        return ElegantRequestHandler.fileGeneratedPath;
+    }
+
+    public static void setFileGeneratedPath(String fileGeneratedPath) {
+        ElegantRequestHandler.fileGeneratedPath = fileGeneratedPath;
     }
 
     public static List<CompilationRequest> getAllRequests() {
@@ -52,7 +68,7 @@ public class ElegantRequestHandler {
 
     public static String getFileNameOfAccelerationCode(long id) {
         CompilationRequest compilerRequest = requests.get(id);
-        String functionName = compilerRequest.getFileInfo().getFunctionName() + "-" + id;
+        String functionName = compilerRequest.getFileInfo().getFunctionName();
         String suffix = "cl";
         String fileName = functionName + "." + suffix;
         return fileName;
@@ -70,8 +86,16 @@ public class ElegantRequestHandler {
         return mapOfUploadedFunctionFileNames.get(id);
     }
 
-    public static String getUploadedJsonFileName(long id) {
-        return mapOfUploadedJsonFileNames.get(id);
+    public static String getUploadedDeviceJsonFileName(long id) {
+        return mapOfUploadedDeviceJsonFileNames.get(id);
+    }
+
+    public static String getUploadedFileInfoJsonFileName(long id) {
+        return mapOfUploadedFileInfoJsonFileNames.get(id);
+    }
+
+    public static String getUploadedParameterSizeJsonFileName(long id) {
+        return mapOfUploadedParameterSizeFileNames.get(id);
     }
 
     public static CompilationRequest addRequest(CompilationRequest request) {
@@ -90,31 +114,58 @@ public class ElegantRequestHandler {
     }
 
     public static void addOrUpdateUploadedFunctionFileName(CompilationRequest request, String functionFileName) {
-        System.out.println("Add " + functionFileName + " - for id: " + request.getId());
         mapOfUploadedFunctionFileNames.put(request.getId(), functionFileName);
     }
 
-    public static void addOrUpdateUploadedJsonFileName(CompilationRequest request, String jsonFileName) {
-        System.out.println("Add Json " + jsonFileName + " - for id: " + request.getId());
-        mapOfUploadedJsonFileNames.put(request.getId(), jsonFileName);
+    public static void addOrUpdateUploadedDeviceJsonFileName(CompilationRequest request, String jsonFileName) {
+        mapOfUploadedDeviceJsonFileNames.put(request.getId(), jsonFileName);
+    }
+
+    public static void addOrUpdateUploadedFileInfoFileName(CompilationRequest request, String jsonFileName) {
+        mapOfUploadedFileInfoJsonFileNames.put(request.getId(), jsonFileName);
+    }
+
+    public static void addOrUpdateUploadedParameterSizeJsonFileName(CompilationRequest request, String jsonFileName) {
+        mapOfUploadedParameterSizeFileNames.put(request.getId(), jsonFileName);
     }
 
     public static CompilationRequest removeRequest(long id) {
         return requests.remove(id);
     }
 
-    public static void removeUploadedFunctionFileName(long id) {
+    public static void removeUploadedFileNames(long id) {
         mapOfUploadedFunctionFileNames.remove(id);
-    }
-
-    public static void removeUploadedJsonFileName(long id) {
-        mapOfUploadedJsonFileNames.remove(id);
+        mapOfUploadedDeviceJsonFileNames.remove(id);
+        mapOfUploadedParameterSizeFileNames.remove(id);
+        mapOfUploadedFileInfoJsonFileNames.remove(id);
     }
 
     // TODO: Update with invocation to the integrated compilers
-    public static void compile(TransactionMetaData transactionMetaData) {
+    public static void compile(LinuxTornadoVM tornadoVM, TransactionMetaData transactionMetaData) throws IOException, InterruptedException {
         CompilationRequest compilerRequest = transactionMetaData.getCompilationRequest();
-        mapOfGeneratedKernelNames.put(compilerRequest.getId(), FILE_GENERATED_PATH + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
-        transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.SUBMITTED);
+        File idDirectory = new File(fileGeneratedPath + File.separator + compilerRequest.getId());
+        if (!idDirectory.exists()) {
+            idDirectory.mkdirs();
+        }
+        mapOfGeneratedKernelNames.put(compilerRequest.getId(),
+                fileGeneratedPath + File.separator + compilerRequest.getId() + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
+        String methodFileName = mapOfUploadedFunctionFileNames.get(compilerRequest.getId());
+        String deviceDescriptionJsonFileName = mapOfUploadedDeviceJsonFileNames.get(compilerRequest.getId());
+        String parameterSizeJsonFileName = mapOfUploadedParameterSizeFileNames.get(compilerRequest.getId());
+        String generatedKernelFileName = mapOfGeneratedKernelNames.get(compilerRequest.getId());
+        tornadoVM.compileToBytecode(compilerRequest.getId(), methodFileName);
+
+        tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, parameterSizeJsonFileName, generatedKernelFileName);
+
+        if (tornadoVM.getExitCode() == 0) {
+            transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.COMPLETED);
+        } else {
+            transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.FAILED);
+        }
+        transactionMetaData.response = Response//
+                .status(Response.Status.ACCEPTED)//
+                .type(MediaType.TEXT_PLAIN_TYPE)//
+                .entity("New code acceleration request has been registered (#" + transactionMetaData.getCompilationRequest().getId() + ")\n")//
+                .build();
     }
 }

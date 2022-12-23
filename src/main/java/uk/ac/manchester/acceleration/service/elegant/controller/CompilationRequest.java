@@ -19,7 +19,7 @@
  */
 package uk.ac.manchester.acceleration.service.elegant.controller;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class CompilationRequest {
@@ -31,22 +31,26 @@ public class CompilationRequest {
     private FileInfo fileInfo;
     private DeviceInfo deviceInfo;
 
+    private ParameterInfo parameterInfo;
+
     private State state;
 
     private String sourceCode; // TODO: Save the source code as a String
 
     private String acceleratedCode; // TODO: Save the acceleratedCode code as a String
 
-    public CompilationRequest(FileInfo fileInfo, DeviceInfo deviceInfo) {
+    public CompilationRequest(FileInfo fileInfo, DeviceInfo deviceInfo, ParameterInfo parameterInfo) {
         this.fileInfo = fileInfo;
         this.deviceInfo = deviceInfo;
+        this.parameterInfo = parameterInfo;
         this.state = State.INITIAL;
     }
 
-    public CompilationRequest(long id, FileInfo fileInfo, DeviceInfo deviceInfo) {
+    public CompilationRequest(long id, FileInfo fileInfo, DeviceInfo deviceInfo, ParameterInfo parameterInfo) {
         this.id = id;
         this.fileInfo = fileInfo;
         this.deviceInfo = deviceInfo;
+        this.parameterInfo = parameterInfo;
         this.state = State.INITIAL;
     }
 
@@ -60,6 +64,10 @@ public class CompilationRequest {
 
     public DeviceInfo getDeviceInfo() {
         return deviceInfo;
+    }
+
+    public ParameterInfo getParameterInfo() {
+        return parameterInfo;
     }
 
     public State getState() {
@@ -76,6 +84,10 @@ public class CompilationRequest {
 
     public void setDeviceInfo(DeviceInfo deviceInfo) {
         this.deviceInfo = deviceInfo;
+    }
+
+    public void setParameterInfo(ParameterInfo parameterInfo) {
+        this.parameterInfo = parameterInfo;
     }
 
     public void setState(State state) {
