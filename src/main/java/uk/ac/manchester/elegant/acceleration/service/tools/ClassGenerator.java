@@ -98,9 +98,7 @@ public class ClassGenerator {
     }
 
     public static String getVirtualClassName(String methodFileName) {
-        System.out.println("methodFileName: " + methodFileName);
         String methodName = getMethodNameFromSignature(getSignatureOfMethodFile(methodFileName));
-        System.out.println("methodName: " + methodName);
         String className = "Test" + methodName.substring(0, 1).toUpperCase() + methodName.substring(1);
         return className;
     }
