@@ -1,0 +1,21 @@
+{
+  "fileInfo": {
+    "functionName": "matrixVectorMultiplication",
+    "programmingLanguage": "Java"
+  },
+  "parameterSizes": {
+    "a": 1024,
+    "b": 1024,
+    "c": 1024,
+    "size": 1024
+  },
+  "deviceInfo": {
+    "deviceName": "Intel(R) Graphics",
+    "doubleFPSupport": true,
+    "maxWorkItemSizes": [16, 1, 1],
+    "deviceAddressBits": 64,
+    "deviceType": "CL_DEVICE_TYPE_GPU",
+    "deviceExtensions": "cl_khr_int64_base_atomics",
+    "availableProcessors": 512
+  }
+}
