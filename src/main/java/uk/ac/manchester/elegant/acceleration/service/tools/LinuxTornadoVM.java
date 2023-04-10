@@ -6,7 +6,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 public class LinuxTornadoVM implements TornadoVMInterface {
@@ -48,7 +50,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         ArrayList<String> args = new ArrayList<>();
         args.add(environmentTornadoVM.get(EnvironmentVariables.JAVA_HOME) + "/bin/javac");
         args.add("-cp");
-        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_ROOT) + "/dist/tornado-sdk/tornado-sdk-0.16-dev-43c4c72/share/java/tornado/tornado-api-0.16-dev.jar");
+        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_ROOT) + "/dist/tornado-sdk/tornado-sdk-0.16-dev-eb8f7ad/share/java/tornado/tornado-api-0.16-dev.jar");
         args.add("-g:vars");
         args.add(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + "/" + ClassGenerator.getVirtualClassFileName(methodFileName));
         return args.toArray(new String[args.size()]);
