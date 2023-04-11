@@ -36,9 +36,9 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         environmentTornadoVM.put(EnvironmentVariables.SERVICE_HOME, System.getenv("SERVICE_HOME"));
         environmentTornadoVM.put(EnvironmentVariables.TORNADOVM_ROOT, System.getenv("TORNADOVM_ROOT"));
         environmentTornadoVM.put(EnvironmentVariables.TORNADO_SDK, System.getenv("TORNADOVM_ROOT")+"/bin/sdk");
-        environmentTornadoVM.put(EnvironmentVariables.UPLOADED_DIR, System.getenv("SERVICE_HOME")+"/examples/uploaded");
-        environmentTornadoVM.put(EnvironmentVariables.GENERATED_KERNELS_DIR, System.getenv("SERVICE_HOME")+"/examples/generated");
-        environmentTornadoVM.put(EnvironmentVariables.BOILERPLATE_DIR, System.getenv("SERVICE_HOME")+"/examples/boilerplate");
+        environmentTornadoVM.put(EnvironmentVariables.UPLOADED_DIR, System.getenv("SERVICE_HOME")+"/service_db/uploaded");
+        environmentTornadoVM.put(EnvironmentVariables.GENERATED_KERNELS_DIR, System.getenv("SERVICE_HOME")+"/service_db/generated");
+        environmentTornadoVM.put(EnvironmentVariables.BOILERPLATE_DIR, System.getenv("SERVICE_HOME")+"/service_db/boilerplate");
     }
 
     @Override
