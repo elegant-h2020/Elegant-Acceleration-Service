@@ -2,6 +2,6 @@
 .idea/*
 .run/*
 *.iml
-/examples/uploaded/*
-/examples/boilerplate/*
-/examples/generated/*
+/service_db/uploaded/*
+/service_db/boilerplate/*
+/service_db/generated/*
