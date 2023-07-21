@@ -6,10 +6,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
+
+import static org.junit.Assert.assertArrayEquals;
 
 public class LinuxTornadoVM implements TornadoVMInterface {
     ProcessBuilder tornadoVMProcessBuilder;
@@ -50,13 +50,13 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         ArrayList<String> args = new ArrayList<>();
         args.add(environmentTornadoVM.get(EnvironmentVariables.JAVA_HOME) + "/bin/javac");
         args.add("-cp");
-        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_ROOT) + "/dist/tornado-sdk/tornado-sdk-0.16-dev-eb8f7ad/share/java/tornado/tornado-api-0.16-dev.jar");
+        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_ROOT) + "/dist/tornado-sdk/tornado-sdk-0.15.2-dev-a9d63b0/share/java/tornado/tornado-api-0.15.2-dev.jar");
         args.add("-g:vars");
         args.add(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + "/" + ClassGenerator.getVirtualClassFileName(methodFileName));
         return args.toArray(new String[args.size()]);
     }
 
-    private String[] getCommandForVirtualCompilation(long id, String methodFileName, String deviceDescriptionJsonFileName, String parameterSizeJsonFileName, String generatedKernelFileName) {
+    private String[] getCommandForVirtualCompilation(long id, String methodFileName, String deviceDescriptionJsonFileName, String kernelName, String parameterSizeJsonFileName, String generatedKernelFileName) {
         ArrayList<String> args = new ArrayList<>();
         String classpath = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id;
         String classFile = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + File.separator + ClassGenerator.getVirtualClassName(methodFileName) + ".class";
@@ -67,8 +67,12 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         args.add(deviceDescriptionJsonFileName);
         args.add(parameterSizeJsonFileName);
         args.add(generatedKernelFileName);
-        args.add(ClassGenerator.getMethodNameFromFileName(methodFileName));
+        args.add(kernelName);
         return args.toArray(new String[args.size()]);
+    }
+
+    private String convertToClassName(String inputClassName) {
+        return inputClassName.replace("class ", "").replace(".", "/");
     }
 
     public void compileToBytecode(long id, String methodFileName) throws IOException, InterruptedException {
@@ -86,10 +90,10 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         printOutputOfProcess(tornadoVMProcess);
     }
 
-    public void compileBytecodeToOpenCL(long id, String methodFileName, String deviceDescriptionJsonFileName, String parameterSizeJsonFileName, String generatedKernelFileName)
+    public void compileBytecodeToOpenCL(long id, String methodFileName, String deviceDescriptionJsonFileName, String kernelName, String parameterSizeJsonFileName, String generatedKernelFileName)
             throws IOException, InterruptedException {
 
-        tornadoVMProcessBuilder.command(getCommandForVirtualCompilation(id, methodFileName, deviceDescriptionJsonFileName, parameterSizeJsonFileName, generatedKernelFileName));
+        tornadoVMProcessBuilder.command(getCommandForVirtualCompilation(id, methodFileName, deviceDescriptionJsonFileName, kernelName, parameterSizeJsonFileName, generatedKernelFileName));
         this.tornadoVMProcess = tornadoVMProcessBuilder.start();
         int exitCode = tornadoVMProcessWaitFor();
 

@@ -1,0 +1,19 @@
+{
+  "fileInfo": {
+    "functionName": "customMap",
+    "programmingLanguage": "Java"
+  },
+  "parameterSizes": {
+    "in": 1024,
+    "out": 1024
+  },
+  "deviceInfo": {
+    "deviceName": "Nvidia GPU",
+    "doubleFPSupport": true,
+    "maxWorkItemSizes": [16, 1, 1],
+    "deviceAddressBits": 64,
+    "deviceType": "CL_DEVICE_TYPE_GPU",
+    "deviceExtensions": "cl_khr_int64_base_atomics",
+    "availableProcessors": 2048
+  }
+}
