@@ -19,6 +19,8 @@
  */
 package uk.ac.manchester.elegant.acceleration.service.controller;
 
+import uk.ac.manchester.asm.tornadifier.backend.skeletons.TornadoVMCustomFunction;
+import uk.ac.manchester.asm.tornadifier.engine.TornadifierMain;
 import uk.ac.manchester.elegant.acceleration.service.tools.LinuxTornadoVM;
 
 import jakarta.ws.rs.core.MediaType;
@@ -152,11 +154,13 @@ public class ElegantRequestHandler {
                 fileGeneratedPath + File.separator + compilerRequest.getId() + File.separator + getFileNameOfAccelerationCode(transactionMetaData.getCompilationRequest().getId()));
         String methodFileName = mapOfUploadedFunctionFileNames.get(compilerRequest.getId());
         String deviceDescriptionJsonFileName = mapOfUploadedDeviceJsonFileNames.get(compilerRequest.getId());
+        String kernelName = compilerRequest.getFileInfo().getFunctionName();
         String parameterSizeJsonFileName = mapOfUploadedParameterSizeFileNames.get(compilerRequest.getId());
         String generatedKernelFileName = mapOfGeneratedKernelNames.get(compilerRequest.getId());
-        tornadoVM.compileToBytecode(compilerRequest.getId(), methodFileName);
 
-        tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, parameterSizeJsonFileName, generatedKernelFileName);
+        //TODO Tornadify the operator
+        tornadoVM.compileToBytecode(compilerRequest.getId(), methodFileName);
+        tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, kernelName, parameterSizeJsonFileName, generatedKernelFileName);
 
         if (tornadoVM.getExitCode() == 0) {
             transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.COMPLETED);

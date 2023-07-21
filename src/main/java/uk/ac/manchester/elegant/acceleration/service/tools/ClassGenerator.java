@@ -16,6 +16,9 @@ public class ClassGenerator {
 
     private static void emitPackagePrologue(StringBuilder sb) {
         sb.append("import uk.ac.manchester.tornado.api.annotations.Parallel;");
+        sb.append("import uk.ac.manchester.tornado.api.collections.math.TornadoMath;");
+        sb.append("import uk.ac.manchester.tornado.api.collections.types.Float2;");
+        sb.append("import uk.ac.manchester.tornado.api.collections.types.VectorFloat2;");
         sb.append("\n");
     }
 
@@ -80,6 +83,7 @@ public class ClassGenerator {
         return line.replaceFirst(" \\{|\\{", ";");
     }
 
+    // TODO Update this to see the all signatures
     private static String getSignatureOfMethodFile(String fileName) {
         FileReader fileReader;
         BufferedReader bufferedReader;
