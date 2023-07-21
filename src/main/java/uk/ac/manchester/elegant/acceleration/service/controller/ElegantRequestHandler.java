@@ -19,8 +19,6 @@
  */
 package uk.ac.manchester.elegant.acceleration.service.controller;
 
-import uk.ac.manchester.asm.tornadifier.backend.skeletons.TornadoVMCustomFunction;
-import uk.ac.manchester.asm.tornadifier.engine.TornadifierMain;
 import uk.ac.manchester.elegant.acceleration.service.tools.LinuxTornadoVM;
 
 import jakarta.ws.rs.core.MediaType;

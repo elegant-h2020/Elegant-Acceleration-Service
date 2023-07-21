@@ -1,24 +1,13 @@
 package uk.ac.manchester.elegant.acceleration.service.tools;
 
-import uk.ac.manchester.asm.tornadifier.backend.skeletons.TornadoVMCustomFunction;
-import uk.ac.manchester.asm.tornadifier.test.TestPrimitiveTypes;
 import uk.ac.manchester.elegant.acceleration.service.controller.EnvironmentVariables;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
-
-import uk.ac.manchester.asm.tornadifier.engine.TornadifierMain;
-import uk.ac.manchester.tornado.api.TaskGraph;
-import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
-import uk.ac.manchester.tornado.api.enums.DataTransferMode;
 
 import static org.junit.Assert.assertArrayEquals;
 
