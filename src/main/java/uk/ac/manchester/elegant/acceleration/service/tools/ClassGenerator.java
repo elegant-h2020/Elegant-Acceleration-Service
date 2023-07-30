@@ -52,7 +52,7 @@ public class ClassGenerator {
         sb.append("\n");
     }
 
-    private static void emitMethod(StringBuilder sb, String method) {
+    private static void emitUdfBody(StringBuilder sb, String method) {
         sb.append("\n");
         sb.append(method);
     }
@@ -62,7 +62,7 @@ public class ClassGenerator {
         sb.append("\n");
     }
 
-    public static String extractMethodFromFileToString(String path) {
+    public static String extractUdfBodyFromFileToString(String path) {
         StringBuilder contentBuilder = new StringBuilder();
 
         try (Stream<String> stream = Files.lines(Paths.get(path), StandardCharsets.UTF_8)) {
@@ -88,12 +88,14 @@ public class ClassGenerator {
         }
     }
 
+    // TODO Deprecate
     private static String getMethodNameFromSignature(String signatureName) {
         String[] strings = signatureName.split("\\(");
         String[] subStrings = strings[0].split(" ");
         return subStrings[subStrings.length - 1];
     }
 
+    // TODO Deprecate
     public static String getMethodNameFromFileName(String methodFileName) {
         String signatureName = getSignatureOfMethodFile(methodFileName);
         String[] strings = signatureName.split("\\(");
@@ -105,7 +107,7 @@ public class ClassGenerator {
         return line.replaceFirst(" \\{|\\{", ";");
     }
 
-    // TODO Update this to see the all signatures
+    // TODO Deprecate
     private static String getSignatureOfMethodFile(String fileName) {
         FileReader fileReader;
         BufferedReader bufferedReader;
@@ -123,24 +125,23 @@ public class ClassGenerator {
         }
     }
 
-    public static String getVirtualClassName(String methodFileName) {
-        String methodName = getMethodNameFromSignature(getSignatureOfMethodFile(methodFileName));
-        String className = "Test" + methodName.substring(0, 1).toUpperCase() + methodName.substring(1);
+    public static String getVirtualClassName(String functionName) {
+        String className = "Test" + functionName.substring(0, 1).toUpperCase() + functionName.substring(1);
         return className;
     }
 
-    public static String getVirtualClassFileName(String methodFileName) {
-        String className = getVirtualClassName(methodFileName);
+    public static String getVirtualClassFileName(String functionName) {
+        String className = getVirtualClassName(functionName);
         return className + SUFFIX;
     }
 
-    public static String generateBoilerplateCode(String methodFileName) {
+    public static String generateBoilerplateCode(String methodFileName, String functionName) {
         stringBuilder = new StringBuilder();
         emitPackagePrologue(stringBuilder);
-        String className = getVirtualClassName(methodFileName);
+        String className = getVirtualClassName(functionName);
         emitClassBegin(stringBuilder, className);
-        String methodBody = extractMethodFromFileToString(methodFileName);
-        emitMethod(stringBuilder, methodBody);
+        String udfBody = extractUdfBodyFromFileToString(methodFileName);
+        emitUdfBody(stringBuilder, udfBody);
         emitClosingBrace(stringBuilder);
         return stringBuilder.toString();
     }

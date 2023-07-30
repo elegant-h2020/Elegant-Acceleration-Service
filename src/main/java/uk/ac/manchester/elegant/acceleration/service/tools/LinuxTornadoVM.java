@@ -64,21 +64,20 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         return 0;
     }
 
-    private String[] getCommandForCompileToBytecode(String methodFileName, long id) {
+    private String[] getCommandForCompileToBytecode(long id, String functionName) {
         ArrayList<String> args = new ArrayList<>();
         args.add(environmentTornadoVM.get(EnvironmentVariables.JAVA_HOME) + "/bin/javac");
         args.add("-cp");
         args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_ROOT) + "/dist/tornado-sdk/tornado-sdk-0.15.2-dev-e6fb7fe/share/java/tornado/tornado-api-0.15.2-dev.jar");
         args.add("-g:vars");
-        args.add(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + "/" + ClassGenerator.getVirtualClassFileName(methodFileName));
+        args.add(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + "/" + ClassGenerator.getVirtualClassFileName(functionName));
         return args.toArray(new String[args.size()]);
     }
 
-    private String[] getCommandForVirtualCompilation(long id, String methodFileName, String deviceDescriptionJsonFileName, String kernelName, String parameterSizeJsonFileName,
-            String generatedKernelFileName) {
+    private String[] getCommandForVirtualCompilation(long id, String deviceDescriptionJsonFileName, String kernelName, String parameterSizeJsonFileName, String generatedKernelFileName) {
         ArrayList<String> args = new ArrayList<>();
         String classpath = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id;
-        String classFile = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + File.separator + ClassGenerator.getVirtualClassName(methodFileName) + ".class";
+        String classFile = environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + File.separator + ClassGenerator.getVirtualClassName(kernelName) + ".class";
         args.add(environmentTornadoVM.get(EnvironmentVariables.SERVICE_HOME) + "/bin/runCompilation.sh");
         args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADO_SDK) + "/bin/tornado");
         args.add(classpath);
@@ -90,25 +89,27 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         return args.toArray(new String[args.size()]);
     }
 
+    // TODO Deprecate
     private String convertToClassName(String inputClassName) {
         return inputClassName.replace("class ", "").replace(".", "/");
     }
 
-    public void compileToBytecode(long id, String methodFileName) throws IOException, InterruptedException {
-        String classBody = assembleClassOfInputMethodToClassFile(methodFileName);
+    public void compileToBytecode(long id, String methodFileName, String functionName) throws IOException, InterruptedException {
+        OperatorParser.parse(methodFileName);
+        String classBody = assembleClassOfInputMethodToClassFile(methodFileName, functionName);
         File file = createNewFileForGeneratedClass(id, classBody);
-        writeGeneratedClassToFile(classBody, file, methodFileName);
+        writeGeneratedClassToFile(classBody, file, functionName);
 
-        System.out.println("CompilationToBytecode: " + Arrays.toString(getCommandForCompileToBytecode(methodFileName, id)));
-        tornadoVMProcessBuilder.command(getCommandForCompileToBytecode(methodFileName, id));
+        System.out.println("CompilationToBytecode: " + Arrays.toString(getCommandForCompileToBytecode(id, functionName)));
+        tornadoVMProcessBuilder.command(getCommandForCompileToBytecode(id, functionName));
         this.tornadoVMProcess = tornadoVMProcessBuilder.start();
         int exitCode = tornadoVMProcessWaitFor();
 
         printOutputOfProcess(tornadoVMProcess);
     }
 
-    private static String assembleClassOfInputMethodToClassFile(String methodFileName) {
-        return ClassGenerator.generateBoilerplateCode(methodFileName);
+    private static String assembleClassOfInputMethodToClassFile(String methodFileName, String functionName) {
+        return ClassGenerator.generateBoilerplateCode(methodFileName, functionName);
     }
 
     private static File createNewFileForGeneratedClass(long id, String classBody) {
@@ -119,14 +120,14 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         return idDirectory;
     }
 
-    private static void writeGeneratedClassToFile(String classBody, File file, String methodFileName) {
-        ClassGenerator.writeClassToFile(classBody, file.getAbsolutePath() + File.separator + ClassGenerator.getVirtualClassFileName(methodFileName));
+    private static void writeGeneratedClassToFile(String classBody, File file, String functionName) {
+        ClassGenerator.writeClassToFile(classBody, file.getAbsolutePath() + File.separator + ClassGenerator.getVirtualClassFileName(functionName));
     }
 
-    public void compileBytecodeToOpenCL(long id, String methodFileName, String deviceDescriptionJsonFileName, String kernelName, String parameterSizeJsonFileName, String generatedKernelFileName)
+    public void compileBytecodeToOpenCL(long id, String deviceDescriptionJsonFileName, String kernelName, String parameterSizeJsonFileName, String generatedKernelFileName)
             throws IOException, InterruptedException {
 
-        tornadoVMProcessBuilder.command(getCommandForVirtualCompilation(id, methodFileName, deviceDescriptionJsonFileName, kernelName, parameterSizeJsonFileName, generatedKernelFileName));
+        tornadoVMProcessBuilder.command(getCommandForVirtualCompilation(id, deviceDescriptionJsonFileName, kernelName, parameterSizeJsonFileName, generatedKernelFileName));
         this.tornadoVMProcess = tornadoVMProcessBuilder.start();
         int exitCode = tornadoVMProcessWaitFor();
 

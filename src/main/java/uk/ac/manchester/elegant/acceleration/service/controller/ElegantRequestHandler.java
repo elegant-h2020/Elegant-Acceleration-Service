@@ -156,9 +156,8 @@ public class ElegantRequestHandler {
         String parameterSizeJsonFileName = mapOfUploadedParameterSizeFileNames.get(compilerRequest.getId());
         String generatedKernelFileName = mapOfGeneratedKernelNames.get(compilerRequest.getId());
 
-        //TODO Tornadify the operator
-        tornadoVM.compileToBytecode(compilerRequest.getId(), methodFileName);
-        tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, kernelName, parameterSizeJsonFileName, generatedKernelFileName);
+        tornadoVM.compileToBytecode(compilerRequest.getId(), methodFileName, kernelName);
+        tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), deviceDescriptionJsonFileName, kernelName, parameterSizeJsonFileName, generatedKernelFileName);
 
         if (tornadoVM.getExitCode() == 0) {
             transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.COMPLETED);
