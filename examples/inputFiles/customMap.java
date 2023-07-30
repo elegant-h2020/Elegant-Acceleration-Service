@@ -1,13 +1,19 @@
-public static Float2 map(Float2 value) {
-        float radius = TornadoMath.sqrt(value.getX() * value.getX() + value.getY() * value.getY());
-        float angle = TornadoMath.atan2(value.getX(), value.getY());
-        Float2 output = new Float2(angle, radius);
+static class CartesianCoordinate {
+    double x;
+    double y;
+}
 
-        return output;
-    }
+// This is he output type of the UDF.
+// The schema of the output stream is derived from the names of the fields
+// `angle` and `radius`.
+static class PolarCoordinate {
+    double angle;
+    double radius;
+}
 
-    public static void customMap(VectorFloat2 in1, VectorFloat2 out) {
-        for (@Parallel int i = 0; i < in1.getLength(); i++) {
-            out.set(i, map(in1.get(i)));
-        }
-    }
+public PolarCoordinate map(final CartesianCoordinate value) {
+    PolarCoordinate output =  new PolarCoordinate();
+    output.radius = Math.sqrt(value.x * value.x + value.y * value.y);
+    output.angle = Math.atan2(value.x, value.y);
+    return output;
+}
