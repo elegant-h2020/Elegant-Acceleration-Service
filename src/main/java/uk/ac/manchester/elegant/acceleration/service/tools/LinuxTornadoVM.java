@@ -95,8 +95,14 @@ public class LinuxTornadoVM implements TornadoVMInterface {
     }
 
     public void compileToBytecode(long id, String methodFileName, String functionName) throws IOException, InterruptedException {
-        OperatorParser.parse(methodFileName);
-        String classBody = assembleClassOfInputMethodToClassFile(methodFileName, functionName);
+        OperatorInfo operatorInfo = OperatorParser.parse(methodFileName);
+        if (operatorInfo == null) {
+            System.err.println("OperatorInfo object is null after parsing the input file.");
+        }
+        // 1. Replace input/output objects to TornadoVM objects
+        OperatorParser.tornadifyIO(operatorInfo);
+        // 2. Rewrite the operator function to be tornadified
+        String classBody = assembleClassOfInputMethodToClassFile(methodFileName, functionName, operatorInfo);
         File file = createNewFileForGeneratedClass(id, classBody);
         writeGeneratedClassToFile(classBody, file, functionName);
 
@@ -108,8 +114,8 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         printOutputOfProcess(tornadoVMProcess);
     }
 
-    private static String assembleClassOfInputMethodToClassFile(String methodFileName, String functionName) {
-        return ClassGenerator.generateBoilerplateCode(methodFileName, functionName);
+    private static String assembleClassOfInputMethodToClassFile(String methodFileName, String functionName, OperatorInfo operatorInfo) {
+        return ClassGenerator.generateBoilerplateCode(methodFileName, functionName, operatorInfo);
     }
 
     private static File createNewFileForGeneratedClass(long id, String classBody) {

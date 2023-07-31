@@ -33,14 +33,25 @@ public class ClassGenerator {
     private static final String SUFFIX = ".java";
     private static StringBuilder stringBuilder;
 
-    private static void emitPackagePrologue(StringBuilder sb) {
+    private static void emitPackagePrologue(StringBuilder sb, OperatorInfo operatorInfo) {
         sb.append("import uk.ac.manchester.tornado.api.annotations.Parallel;");
         sb.append("\n");
-        sb.append("import uk.ac.manchester.tornado.api.collections.math.TornadoMath;");
-        sb.append("\n");
-        sb.append("import uk.ac.manchester.tornado.api.collections.types.Float2;");
-        sb.append("\n");
-        sb.append("import uk.ac.manchester.tornado.api.collections.types.VectorFloat2;");
+        if (operatorInfo.methodUsesMathPackage) {
+            sb.append("import uk.ac.manchester.tornado.api.collections.math.TornadoMath;");
+            sb.append("\n");
+        }
+
+        String[] operatorNames = OperatorParser.getUniqueOperatorName(operatorInfo);
+        for (int i = 0; i < operatorNames.length; i++) {
+            sb.append("import uk.ac.manchester.tornado.api.collections.types.");
+            sb.append(operatorNames[i]);
+            sb.append(";");
+            sb.append("\n");
+            sb.append("import uk.ac.manchester.tornado.api.collections.types.Vector");
+            sb.append(operatorNames[i]);
+            sb.append(";");
+            sb.append("\n");
+        }
         sb.append("\n");
     }
 
@@ -135,9 +146,9 @@ public class ClassGenerator {
         return className + SUFFIX;
     }
 
-    public static String generateBoilerplateCode(String methodFileName, String functionName) {
+    public static String generateBoilerplateCode(String methodFileName, String functionName, OperatorInfo operatorInfo) {
         stringBuilder = new StringBuilder();
-        emitPackagePrologue(stringBuilder);
+        emitPackagePrologue(stringBuilder, operatorInfo);
         String className = getVirtualClassName(functionName);
         emitClassBegin(stringBuilder, className);
         String udfBody = extractUdfBodyFromFileToString(methodFileName);
