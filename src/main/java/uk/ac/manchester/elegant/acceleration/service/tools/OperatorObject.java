@@ -22,9 +22,10 @@ package uk.ac.manchester.elegant.acceleration.service.tools;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class OperatorObject {
+public class OperatorObject implements Cloneable {
     ConcurrentHashMap<String, String> mapTypeToFieldName;
     ArrayList<String> listOfTypes;
+    ArrayList<ObjectField> listOfField;
     boolean isObjectPublic;
     boolean isObjectStatic;
     String className;
@@ -32,27 +33,31 @@ public class OperatorObject {
     public OperatorObject() {
         mapTypeToFieldName = new ConcurrentHashMap<>();
         listOfTypes = new ArrayList<>();
+        listOfField = new ArrayList<>();
     }
 
-    public OperatorObject(String name) {
-        super();
-        this.className = name;
-    }
-
-    public void addEntryInMapTypeToVariableName(String type, String fieldName) {
+    public void addEntryInMapTypeToVariableName(String fieldName, String type) {
         mapTypeToFieldName.put(fieldName, type);
     }
 
-    public void addEntryInMapTypeParentObjectName(String type) {
+    public void addEntryInFieldType(String type) {
         listOfTypes.add(type);
     }
 
-    public String getTypeOfField(String fieldName) {
-        return mapTypeToFieldName.get(fieldName);
+    public void addEntryInFieldName(String fieldName) {
+        listOfField.add(new ObjectField(fieldName));
     }
 
     public ArrayList getListOfTypes() {
         return listOfTypes;
     }
 
+    public ArrayList getListOfField() {
+        return listOfField;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

@@ -24,14 +24,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class OperatorInfo {
     ArrayList<String> listOfOperatorObjectNames = new ArrayList<>();
+    ConcurrentHashMap<String, OperatorObject> hashMapOfNameAndOperatorObjects = new ConcurrentHashMap<>();
     ConcurrentHashMap<String, OperatorObject> inputVariableNameToTypeMap = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, OperatorObject> inputVariableNameToTornadoTypeMap = new ConcurrentHashMap<>();
     ArrayList<String> argumentNameList = new ArrayList<>();
+    ConcurrentHashMap<String, OperatorObject> variableNameToTypeMap = new ConcurrentHashMap<>();
+    ArrayList<String> variableNameList = new ArrayList<>();
     ArrayList<OperatorObject> inputList = new ArrayList<>();
-    ConcurrentHashMap<OperatorObject, String> tornadifiedInputList = new ConcurrentHashMap<>();
+    ArrayList<OperatorObject> tornadifiedInputList = new ArrayList<>();
     ArrayList<OperatorObject> outputList = new ArrayList<>();
     ArrayList<OperatorObject> tornadifiedOutputList = new ArrayList<>();
     boolean isMethodPublic;
     boolean isMethodStatic;
     boolean methodUsesMathPackage;
     String udfName;
+    String renamedUdfName;
 }
