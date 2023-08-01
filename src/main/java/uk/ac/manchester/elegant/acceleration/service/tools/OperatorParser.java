@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
@@ -38,17 +37,14 @@ public class OperatorParser {
     private static boolean shouldParseObject = false;
     private static OperatorObject operatorObject = null;
 
-    private static ConcurrentHashMap<String, OperatorObject> hashMapOfOperatorObjects = new ConcurrentHashMap<>();
-
     public static void parseMethod(String methodFileName) {
-        System.out.println("The methodFileName is: " + methodFileName);
         OperatorInfo operatorInfo = new OperatorInfo();
 
         try (Stream<String> stream = Files.lines(Paths.get(methodFileName), StandardCharsets.UTF_8)) {
             // Read the content with Stream
             stream.forEach(s -> {
                 try {
-                    parseLine(s, operatorInfo);
+                    parseLine(s, operatorInfo, null);
                 } catch (IOException e) {
                     System.err.println("Runtime error while parsing lines of input files: " + e.getMessage());
                 }
@@ -58,7 +54,7 @@ public class OperatorParser {
         }
     }
 
-    private static boolean isLineEmpty(String string) {
+    static boolean isLineEmpty(String string) {
         return string.equals("\t") || string.equals(" ");
     }
 
@@ -77,8 +73,7 @@ public class OperatorParser {
         }
     }
 
-    private static void parseLine(String line, OperatorInfo operatorInfo) throws IOException {
-        System.out.println("parseLine Line: " + line);
+    private static void parseLine(String line, OperatorInfo operatorInfo, String functionName) throws IOException {
         if (isLineEmpty(line) || lineStartsAComment(line)) {
             return;
         }
@@ -89,18 +84,14 @@ public class OperatorParser {
         }
 
         if (shouldParseObject) {
-            System.out.println("parseObjectClass");
             parseObjectClass(line, operatorObject, operatorInfo);
         } else {
-            System.out.println("parseOperator");
-            parseOperator(line, operatorInfo);
+            parseOperator(line, operatorInfo, functionName);
         }
     }
 
     private static void parseObjectClass(String line, OperatorObject operatorObject, OperatorInfo operatorInfo) {
-        System.out.println("parseObjectClass Line: " + line);
         if (line.equals("}")) {
-            System.out.println("parseObjectClass: make shouldParseObject false.");
             shouldParseObject = false;
             return;
         }
@@ -110,7 +101,6 @@ public class OperatorParser {
         StringTokenizer tokenizer = new StringTokenizer(line, " ");
         while (tokenizer.hasMoreElements()) {
             String token = tokenizer.nextToken();
-            System.out.println("Token is: " + token);
 
             switch (token) {
                 case "public":
@@ -121,70 +111,87 @@ public class OperatorParser {
                     break;
                 case "class":
                     operatorObject.className = tokenizer.nextToken(" ");
-                    hashMapOfOperatorObjects.put(operatorObject.className, operatorObject);
+                    operatorInfo.hashMapOfNameAndOperatorObjects.put(operatorObject.className, operatorObject);
                     operatorInfo.listOfOperatorObjectNames.add(operatorObject.className);
                     tokenizer.nextToken(" "); // this should be the bracket {
                     break;
                 default:
                     String nextToken = tokenizer.nextToken(" ;");
-                    System.out.println("token: " + token + " - nextToken: " + nextToken);
                     operatorObject.addEntryInMapTypeToVariableName(token, nextToken);
-                    operatorObject.addEntryInMapTypeParentObjectName(token);
+                    operatorObject.addEntryInFieldName(nextToken);
+                    operatorObject.addEntryInFieldType(token);
                     break;
             }
         }
     }
 
-    private static void parseOperator(String line, OperatorInfo operatorInfo) {
-        System.out.println("parseOperator Line: " + line);
+    private static String trimFirstSpaceFromString(String string) {
+        return string.replaceFirst("\\s+", "");
+    }
+
+    private static void setVariableNamesOfUdfPojos(String line, OperatorInfo operatorInfo) {
+        String[] operatorNames = OperatorParser.getUniqueOperatorName(operatorInfo);
+        for (int i = 0; i < operatorNames.length; i++) {
+            if (line.contains(operatorNames[i]) && line.contains("new")) { // Declaration of new objects;
+                line = trimFirstSpaceFromString(line);
+                String[] strings = line.split("=");
+                String[] subStrings = strings[0].split(" ");
+                if (subStrings.length > 1) {
+                    operatorInfo.variableNameList.add(subStrings[1]);
+                    OperatorObject pojo = operatorInfo.hashMapOfNameAndOperatorObjects.get(subStrings[0]);
+                    operatorInfo.variableNameToTypeMap.put(subStrings[1], pojo);
+                }
+            }
+        }
+    }
+
+    private static void parseOperator(String line, OperatorInfo operatorInfo, String functionName) {
         if (line.equals("}") || isLineEmpty(line) || lineStartsAComment(line)) {
             // shouldParseObject = false;
             return;
         }
+
+        operatorInfo.udfName = functionName;
+
+        // Add declared variables
+        setVariableNamesOfUdfPojos(line, operatorInfo);
+
         StringTokenizer tokenizer = new StringTokenizer(line, " (");
+
         while (tokenizer.hasMoreElements()) {
             String token = tokenizer.nextToken();
-            System.out.println("Token is: " + token);
-
             switch (token) {
                 case "public":
                     operatorInfo.isMethodPublic = true;
                     String nextToken = tokenizer.nextToken();
-
-                    System.out.println("Token2 is: " + nextToken);
-
                     if (nextToken.equals("static")) {
                         operatorInfo.isMethodStatic = true;
+                        nextToken = tokenizer.nextToken();
+                    }
+                    if (nextToken.equals("void")) {
+                        break;
                     } else {
-                        if (nextToken.equals("void")) {
-                            break;
-                        } else {
-                            // 1. Check that object name exists in the added parsed list
+                        // 1. Check that object name exists in the added parsed list
+                        if (operatorInfo.listOfOperatorObjectNames.contains(nextToken)) {
+                            OperatorObject pojo = operatorInfo.hashMapOfNameAndOperatorObjects.get(nextToken);
                             // 2. Add the operator Object in the outputList
-                            if (operatorInfo.listOfOperatorObjectNames.contains(nextToken)) {
-                                OperatorObject pojo = hashMapOfOperatorObjects.get(nextToken);
-                                operatorInfo.outputList.add(pojo);
-                            } else {
-                                System.err.println("The object (" + nextToken + ") is not recognized.");
-                            }
+                            operatorInfo.outputList.add(pojo);
+                        } else {
+                            System.err.println("The object (" + nextToken + ") is not recognized.");
                         }
                     }
-                    break;
-                case "static":
-                    operatorInfo.isMethodStatic = true;
+
                     break;
                 case "map":
-                    operatorInfo.udfName = token;
+                    // operatorInfo.udfName = token;
                     int numberOfInputs = getNumberOfInputs(line);
                     for (int i = 0; i < numberOfInputs; i++) {
                         String tokenAfterOperatorName = tokenizer.nextToken();
                         if (tokenAfterOperatorName.equals("final")) {
                             tokenAfterOperatorName = tokenizer.nextToken();
                         }
-                        System.out.println("tokenAfterOperatorName[" + i + "] is: " + tokenAfterOperatorName);
-                        OperatorObject pojo = hashMapOfOperatorObjects.get(tokenAfterOperatorName);
-                        String argumentName = tokenizer.nextToken();
-                        System.out.println("Add in inputList[" + i + "] key: " + argumentName + " - value: " + pojo.className);
+                        OperatorObject pojo = operatorInfo.hashMapOfNameAndOperatorObjects.get(tokenAfterOperatorName);
+                        String argumentName = tokenizer.nextToken(") ");
                         operatorInfo.inputList.add(pojo);
                         operatorInfo.argumentNameList.add(argumentName);
                         operatorInfo.inputVariableNameToTypeMap.put(argumentName, pojo);
@@ -197,7 +204,7 @@ public class OperatorParser {
         }
     }
 
-    public static OperatorInfo parse(String methodFileName) {
+    public static OperatorInfo parse(String methodFileName, String functionName) {
         FileReader fileReader;
         BufferedReader bufferedReader;
         try {
@@ -206,11 +213,11 @@ public class OperatorParser {
             String line;
             OperatorInfo operatorInfo = new OperatorInfo();
             while ((line = bufferedReader.readLine()) != null) {
-                parseLine(line, operatorInfo);
+                parseLine(line, operatorInfo, functionName);
             }
             return operatorInfo;
         } catch (IOException e) {
-            System.out.println("Wrong uploaded file or format. Please ensure that the UDF file is configured properly!");
+            System.err.println("Wrong uploaded file or format. Please ensure that the UDF file is configured properly!");
         }
         return null;
     }
@@ -221,10 +228,8 @@ public class OperatorParser {
         typesOfFields.forEach((t) -> {
             if (firstType[0] == null) {
                 firstType[0] = (String) t;
-                System.out.println("[checkHomogeneityOfFields] first type is: " + t.toString());
             } else if (!firstType[0].equals(t)) {
                 isHomogeneous.set(false);
-                System.out.println("[checkHomogeneityOfFields] Homogeineity broke fron type: " + t.toString());
             }
         });
 
@@ -298,13 +303,11 @@ public class OperatorParser {
         for (int i = 0; i < list.size(); i++) {
             OperatorObject pojo = (OperatorObject) list.get(i);
             if (pojo.className.equals(pojoName)) {
-                System.out.println("[tornadifyIO] pojo: " + pojo.className + " - pojoName: " + pojoName + " is used as input");
                 ArrayList typesOfFields = pojo.getListOfTypes();
                 // a. check that types are homogeneous
                 if (checkHomogeneityOfFields(typesOfFields)) {
                     // b. Find the replacable TornadoVM Type
                     String tornadoTypeName = tornadifyType(typesOfFields);
-                    System.out.println("[tornadifyIO] getTornadoVMTypeForPojoNameIfHomogeneous pojo: " + pojo.className);
                     return tornadoTypeName;
                 } else {
                     System.err.println("The types in operator [" + pojoName + "] should be homogeneous.");
@@ -316,35 +319,25 @@ public class OperatorParser {
 
     static void tornadifyIO(OperatorInfo operatorInfo) {
         final ListIterator<String> stringListIterator = operatorInfo.listOfOperatorObjectNames.listIterator();
-        // System.out.println("[tornadifyIO] list of objects in operator size: " +
-        // operatorInfo.listOfOperatorObjectNames.size());
         while (stringListIterator.hasNext()) {
             String pojoName = stringListIterator.next(); // CartesianCoordinate
             OperatorObject tornadoInputPojo = null;
             OperatorObject tornadoOutputPojo = null;
-            // System.out.println("[tornadifyIO] Object name: " + pojoName);
 
             // Check if operator is used as input
-            // System.out.println("[tornadifyIO] operatorInfo.inputList.size(): " +
-            // operatorInfo.inputList.size());
             String tornadoInputTypeName = getTornadoVMTypeForPojoNameIfHomogeneous(pojoName, operatorInfo.inputList);
             if (tornadoInputTypeName != null) {
-                // System.out.println("[tornadifyIO] tornadoInputTypeName is: " +
-                // tornadoInputTypeName);
-                // System.out.println("[tornadifyIO] operatorInfo.inputList.size(): " +
-                // operatorInfo.inputList.size());
                 for (int i = 0; i < operatorInfo.inputList.size(); i++) {
                     OperatorObject pojo = operatorInfo.inputList.get(i);
-                    // System.out.println("[tornadifyIO] Going to replace input pojo: " +
-                    // pojo.className + " that should be: " + pojoName);
                     if (pojo.className.equals(pojoName)) {
-                        tornadoInputPojo = pojo;
-                        System.out.println("[tornadifyIO] Input[" + i + "] replace objectType: " + pojo.className + " with " + tornadoInputTypeName);
+                        try {
+                            tornadoInputPojo = (OperatorObject) pojo.clone();
+                        } catch (CloneNotSupportedException e) {
+                            throw new RuntimeException(e);
+                        }
                         tornadoInputPojo.className = tornadoInputTypeName;
-                        operatorInfo.inputVariableNameToTypeMap.replace(operatorInfo.argumentNameList.get(i), pojo, tornadoInputPojo);
-                        operatorInfo.tornadifiedInputList.put(tornadoInputPojo, tornadoInputPojo.className);
-                        // operatorInfo.listOfOperatorObjectNames.set((stringListIterator.nextIndex() -
-                        // 1), tornadoInputPojo.className);
+                        operatorInfo.inputVariableNameToTornadoTypeMap.put(operatorInfo.argumentNameList.get(i), tornadoInputPojo);
+                        operatorInfo.tornadifiedInputList.add(tornadoInputPojo);
                     }
                 }
             }
@@ -352,17 +345,15 @@ public class OperatorParser {
             // Check if operator is used as output
             String tornadoOutputTypeName = getTornadoVMTypeForPojoNameIfHomogeneous(pojoName, operatorInfo.outputList);
             if (tornadoOutputTypeName != null) {
-                // System.out.println("[tornadifyIO] tornadoOutputTypeName is: " +
-                // tornadoOutputTypeName);
-                // System.out.println("[tornadifyIO] operatorInfo.outputList.size(): " +
-                // operatorInfo.outputList.size());
+
                 for (int i = 0; i < operatorInfo.outputList.size(); i++) {
                     OperatorObject pojo = operatorInfo.outputList.get(i);
-                    // System.out.println("[tornadifyIO] Going to replace output pojo: " +
-                    // pojo.className + " that should be: " + pojoName);
                     if (pojo.className.equals(pojoName)) {
-                        tornadoOutputPojo = pojo;
-                        System.out.println("[tornadifyIO] Output[" + i + "] replace objectType: " + pojo.className + " with " + tornadoOutputTypeName);
+                        try {
+                            tornadoOutputPojo = (OperatorObject) pojo.clone();
+                        } catch (CloneNotSupportedException e) {
+                            throw new RuntimeException(e);
+                        }
                         tornadoOutputPojo.className = tornadoOutputTypeName;
                         operatorInfo.tornadifiedOutputList.add(tornadoOutputPojo);
                     }
