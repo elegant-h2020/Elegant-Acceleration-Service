@@ -106,7 +106,6 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         File file = createNewFileForGeneratedClass(id, classBody);
         writeGeneratedClassToFile(classBody, file, functionName);
 
-        System.out.println("CompilationToBytecode: " + Arrays.toString(getCommandForCompileToBytecode(id, functionName)));
         tornadoVMProcessBuilder.command(getCommandForCompileToBytecode(id, functionName));
         this.tornadoVMProcess = tornadoVMProcessBuilder.start();
         int exitCode = tornadoVMProcessWaitFor();
