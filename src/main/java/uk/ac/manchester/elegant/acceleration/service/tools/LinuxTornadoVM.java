@@ -95,7 +95,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
     }
 
     public void compileToBytecode(long id, String methodFileName, String functionName) throws IOException, InterruptedException {
-        OperatorInfo operatorInfo = OperatorParser.parse(methodFileName);
+        OperatorInfo operatorInfo = OperatorParser.parse(methodFileName, functionName);
         if (operatorInfo == null) {
             System.err.println("OperatorInfo object is null after parsing the input file.");
         }
