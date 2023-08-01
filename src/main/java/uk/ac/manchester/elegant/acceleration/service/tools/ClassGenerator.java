@@ -113,7 +113,6 @@ public class ClassGenerator {
             if (line.contains(operatorInfo.inputList.get(i).className)) {
                 OperatorObject deprecatedObject = operatorInfo.inputList.get(i);
                 OperatorObject tornadoObject = operatorInfo.tornadifiedInputList.get(i);
-                operatorInfo.tornadifiedInputList.forEach(input -> System.out.println(input.className));
                 transformedSignature = line.replace(deprecatedObject.className, tornadoObject.className);
             }
         }
@@ -122,7 +121,6 @@ public class ClassGenerator {
             if (line.contains(operatorInfo.outputList.get(i).className)) {
                 OperatorObject deprecatedObject = operatorInfo.outputList.get(i);
                 OperatorObject tornadoObject = operatorInfo.tornadifiedOutputList.get(i);
-                operatorInfo.tornadifiedInputList.forEach(input -> System.out.println(input.className));
                 transformedSignature = transformedSignature.replace(deprecatedObject.className, tornadoObject.className);
             }
         }
@@ -267,6 +265,30 @@ public class ClassGenerator {
 
     private static String getTornadoVMVectorTypeOfPojo(OperatorObject operatorObject) {
         return "Vector" + operatorObject.className;
+    }
+
+    public static String extractNonNesUdfBodyFromFileToString(String path) {
+        StringBuilder sb = new StringBuilder();
+        try (Stream<String> stream = Files.lines(Paths.get(path), StandardCharsets.UTF_8)) {
+            // Read the content with Stream
+            stream.forEach(string -> {
+                // tornadify the for loop
+                if (string.contains("for")) {
+                    String[] strings = string.split("for");
+                    strings[1] = strings[1].replace("(", "(@Parallel ");
+                    sb.append(strings[0]);
+                    sb.append("for");
+                    sb.append(strings[1]);
+                    sb.append("\n");
+                } else {
+                    sb.append(string);
+                    sb.append("\n");
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
     }
 
     /**
@@ -449,9 +471,14 @@ public class ClassGenerator {
         emitPackagePrologue(stringBuilder, operatorInfo);
         String className = getVirtualClassName(functionName);
         emitClassBegin(stringBuilder, className);
-        String udfBody = extractUdfBodyFromFileToString(methodFileName, operatorInfo);
-        emitUdfBody(stringBuilder, udfBody);
-        String scalableSkeletonBody = extractScalableSkeletonBody(operatorInfo);
+        String scalableSkeletonBody = null;
+        if (functionName.equals("map")) {
+            String udfBody = extractUdfBodyFromFileToString(methodFileName, operatorInfo);
+            emitUdfBody(stringBuilder, udfBody);
+            scalableSkeletonBody = extractScalableSkeletonBody(operatorInfo);
+        } else {
+            scalableSkeletonBody = extractNonNesUdfBodyFromFileToString(methodFileName);
+        }
         emitUdfBody(stringBuilder, scalableSkeletonBody);
         emitClosingBrace(stringBuilder);
         return stringBuilder.toString();
