@@ -110,10 +110,10 @@ public class ElegantAccelerationService {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/submit")
-    public Response uploadFile(@FormDataParam("codeFile") InputStream codeFileInputStream,
-                               @FormDataParam("codeFile") FormDataContentDisposition codeFileMetaData,
-                               @FormDataParam("jsonFile") InputStream jsonFileInputStream,
-                               @FormDataParam("jsonFile") FormDataContentDisposition jsonFileMetaData) throws IOException, InterruptedException {
+    public Response uploadFile(@FormDataParam("codeFile") InputStream codeFileInputStream, //
+            @FormDataParam("codeFile") FormDataContentDisposition codeFileMetaData, //
+            @FormDataParam("jsonFile") InputStream jsonFileInputStream, //
+            @FormDataParam("jsonFile") FormDataContentDisposition jsonFileMetaData) throws IOException, InterruptedException {
         TransactionMetaData transactionMetaData = null;
         String msg = "Accepted request. Files uploaded.";
 
@@ -137,7 +137,7 @@ public class ElegantAccelerationService {
             ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
             ElegantRequestHandler.addOrUpdateUploadedFileInfoFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFileInfoName());
             ElegantRequestHandler.addOrUpdateUploadedParameterSizeJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getParameterSizeFileName());
-            ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
+            msg = ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
         }
 
         return transactionMetaData.response;
@@ -148,11 +148,11 @@ public class ElegantAccelerationService {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/{requestId}/resubmit")
-    public Response updateAndCompile(@PathParam("requestId") long requestId,
-                                     @FormDataParam("codeFile") InputStream codeFileInputStream,
-                                     @FormDataParam("codeFile") FormDataContentDisposition codeFileMetaData,
-                                     @FormDataParam("jsonFile") InputStream jsonFileInputStream,
-                                     @FormDataParam("jsonFile") FormDataContentDisposition jsonFileMetaData) throws IOException, InterruptedException {
+    public Response updateAndCompile(@PathParam("requestId") long requestId, //
+            @FormDataParam("codeFile") InputStream codeFileInputStream, //
+            @FormDataParam("codeFile") FormDataContentDisposition codeFileMetaData, //
+            @FormDataParam("jsonFile") InputStream jsonFileInputStream, //
+            @FormDataParam("jsonFile") FormDataContentDisposition jsonFileMetaData) throws IOException, InterruptedException {
         TransactionMetaData transactionMetaData = null;
         String msg = "Accepted request. Files uploaded.";
 
@@ -182,7 +182,7 @@ public class ElegantAccelerationService {
             ElegantRequestHandler.addOrUpdateUploadedFunctionFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getFunctionFileName());
             ElegantRequestHandler.addOrUpdateUploadedDeviceJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getJsonFileName());
             ElegantRequestHandler.addOrUpdateUploadedParameterSizeJsonFileName(transactionMetaData.getCompilationRequest(), transactionMetaData.getParameterSizeFileName());
-            ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
+            msg = ElegantRequestHandler.compile(tornadoVM, transactionMetaData);
         }
 
         return transactionMetaData.response;
