@@ -33,7 +33,8 @@ public class LinuxTornadoVM implements TornadoVMInterface {
     ProcessBuilder tornadoVMProcessBuilder;
     static Map<String, String> environmentTornadoVM;
     Process tornadoVMProcess;
-    int exitCode;
+    int bytecodeExitCode;
+    int tornadoExitCode;
     String output;
 
     public LinuxTornadoVM() {
@@ -61,14 +62,22 @@ public class LinuxTornadoVM implements TornadoVMInterface {
 
     @Override
     public int getExitCode() {
-        return 0;
+        return bytecodeExitCode | tornadoExitCode;
+    }
+
+    public int getBytecodeExitCode() {
+        return bytecodeExitCode;
+    }
+
+    public int getTornadoExitCode() {
+        return tornadoExitCode;
     }
 
     private String[] getCommandForCompileToBytecode(long id, String functionName) {
         ArrayList<String> args = new ArrayList<>();
         args.add(environmentTornadoVM.get(EnvironmentVariables.JAVA_HOME) + "/bin/javac");
         args.add("-cp");
-        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_ROOT) + "/dist/tornado-sdk/tornado-sdk-0.15.2-dev-b19aa7f/share/java/tornado/tornado-api-0.15.2-dev.jar");
+        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_ROOT) + "/dist/tornado-sdk/tornado-sdk-0.15.2-dev-f364642/share/java/tornado/tornado-api-0.15.2-dev.jar");
         args.add("-g:vars");
         args.add(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + "/" + ClassGenerator.getVirtualClassFileName(functionName));
         return args.toArray(new String[args.size()]);
@@ -108,7 +117,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
 
         tornadoVMProcessBuilder.command(getCommandForCompileToBytecode(id, functionName));
         this.tornadoVMProcess = tornadoVMProcessBuilder.start();
-        int exitCode = tornadoVMProcessWaitFor();
+        bytecodeExitCode = tornadoVMProcessWaitFor();
 
         printOutputOfProcess(tornadoVMProcess);
     }
@@ -134,7 +143,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
 
         tornadoVMProcessBuilder.command(getCommandForVirtualCompilation(id, deviceDescriptionJsonFileName, kernelName, parameterSizeJsonFileName, generatedKernelFileName));
         this.tornadoVMProcess = tornadoVMProcessBuilder.start();
-        int exitCode = tornadoVMProcessWaitFor();
+        tornadoExitCode = tornadoVMProcessWaitFor();
 
         printOutputOfProcess(tornadoVMProcess);
     }
