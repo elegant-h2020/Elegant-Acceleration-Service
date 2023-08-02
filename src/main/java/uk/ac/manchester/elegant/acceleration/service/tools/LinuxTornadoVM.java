@@ -68,7 +68,7 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         ArrayList<String> args = new ArrayList<>();
         args.add(environmentTornadoVM.get(EnvironmentVariables.JAVA_HOME) + "/bin/javac");
         args.add("-cp");
-        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_ROOT) + "/dist/tornado-sdk/tornado-sdk-0.15.2-dev-e6fb7fe/share/java/tornado/tornado-api-0.15.2-dev.jar");
+        args.add(environmentTornadoVM.get(EnvironmentVariables.TORNADOVM_ROOT) + "/dist/tornado-sdk/tornado-sdk-0.15.2-dev-b19aa7f/share/java/tornado/tornado-api-0.15.2-dev.jar");
         args.add("-g:vars");
         args.add(environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR) + "/" + id + "/" + ClassGenerator.getVirtualClassFileName(functionName));
         return args.toArray(new String[args.size()]);
