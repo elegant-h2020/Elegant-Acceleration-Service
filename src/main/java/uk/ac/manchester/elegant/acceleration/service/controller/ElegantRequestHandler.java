@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-//TODO Make methods static
 public class ElegantRequestHandler {
 
     private static String fileGeneratedPath;
@@ -141,8 +140,9 @@ public class ElegantRequestHandler {
         mapOfUploadedFileInfoJsonFileNames.remove(id);
     }
 
-    // TODO: Update with invocation to the integrated compilers
-    public static void compile(LinuxTornadoVM tornadoVM, TransactionMetaData transactionMetaData) throws IOException, InterruptedException {
+    public static String compile(LinuxTornadoVM tornadoVM, TransactionMetaData transactionMetaData) throws IOException, InterruptedException {
+        String message = null;
+        Response.Status status = null;
         CompilationRequest compilerRequest = transactionMetaData.getCompilationRequest();
         File idDirectory = new File(fileGeneratedPath + File.separator + compilerRequest.getId());
         if (!idDirectory.exists()) {
@@ -156,19 +156,49 @@ public class ElegantRequestHandler {
         String parameterSizeJsonFileName = mapOfUploadedParameterSizeFileNames.get(compilerRequest.getId());
         String generatedKernelFileName = mapOfGeneratedKernelNames.get(compilerRequest.getId());
 
-        //TODO Tornadify the operator
-        tornadoVM.compileToBytecode(compilerRequest.getId(), methodFileName);
-        tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), methodFileName, deviceDescriptionJsonFileName, kernelName, parameterSizeJsonFileName, generatedKernelFileName);
+        tornadoVM.compileToBytecode(compilerRequest.getId(), methodFileName, kernelName);
+        transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.SUBMITTED);
+        tornadoVM.compileBytecodeToOpenCL(compilerRequest.getId(), deviceDescriptionJsonFileName, kernelName, parameterSizeJsonFileName, generatedKernelFileName);
 
         if (tornadoVM.getExitCode() == 0) {
             transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.COMPLETED);
-        } else {
+            message = "The request has been completed.\n" + "New code acceleration request has been registered (#" + transactionMetaData.getCompilationRequest().getId() + ")\n";
+            status = Response.Status.ACCEPTED;
+        } else if (tornadoVM.getBytecodeExitCode() != 0) {
             transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.FAILED);
+            message = "The bytecode compilation command failed with error code(" + tornadoVM.getBytecodeExitCode() + ").\nCheck the server log.\n";
+            status = Response.Status.INTERNAL_SERVER_ERROR;
+        } else if (tornadoVM.getTornadoExitCode() != 0) {
+            transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.UNSUPPORTED);
+            status = Response.Status.INTERNAL_SERVER_ERROR;
+            message = "The TornadoVM compilation command failed with error code(" + tornadoVM.getTornadoExitCode() + ").\n";
+            switch (tornadoVM.getTornadoExitCode()) {
+                case 3:
+                    message += "An error occured in TornadoVM, when reflection was used.\n";
+                    break;
+                case 4:
+                    message += "An error occured in TornadoVM, related to the parameter file.\n";
+                    break;
+                case 5:
+                    message += "An error occured in TornadoVM, in the compiler.\n";
+                    break;
+                case 6:
+                    message += "An error occured in TornadoVM, regarding the virtual device.\n";
+                    break;
+                default:
+                    break;
+            }
+            message += "Check the server log.\n";
+        } else {
+            status = Response.Status.NOT_IMPLEMENTED;
+            message = "Should not reach here.\n";
         }
         transactionMetaData.response = Response//
-                .status(Response.Status.ACCEPTED)//
+                .status(status)//
                 .type(MediaType.TEXT_PLAIN_TYPE)//
-                .entity("New code acceleration request has been registered (#" + transactionMetaData.getCompilationRequest().getId() + ")\n")//
+                .entity(message)//
                 .build();
+
+        return message;
     }
 }

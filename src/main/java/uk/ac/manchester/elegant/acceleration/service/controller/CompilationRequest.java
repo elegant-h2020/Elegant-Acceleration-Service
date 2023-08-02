@@ -35,10 +35,6 @@ public class CompilationRequest {
 
     private State state;
 
-    private String sourceCode; // TODO: Save the source code as a String
-
-    private String acceleratedCode; // TODO: Save the acceleratedCode code as a String
-
     public CompilationRequest(FileInfo fileInfo, DeviceInfo deviceInfo, ParameterInfo parameterInfo) {
         this.fileInfo = fileInfo;
         this.deviceInfo = deviceInfo;

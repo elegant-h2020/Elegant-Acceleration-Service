@@ -19,10 +19,12 @@
  */
 package uk.ac.manchester.elegant.acceleration.service.tools;
 
-import java.io.IOException;
+public class ObjectField implements Cloneable {
+    String fieldName;
+    boolean isDeclaredInRewrittenFunction;
 
-public interface TornadoVMInterface {
-    void initializeEnvironment() throws IOException, InterruptedException;
-
-    int getExitCode();
+    public ObjectField(String fieldName) {
+        this.fieldName = fieldName;
+        isDeclaredInRewrittenFunction = false;
+    }
 }
