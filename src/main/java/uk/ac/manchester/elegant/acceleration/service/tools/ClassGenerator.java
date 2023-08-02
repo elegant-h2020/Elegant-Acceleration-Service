@@ -419,41 +419,8 @@ public class ClassGenerator {
         }
     }
 
-    // TODO Deprecate
-    private static String getMethodNameFromSignature(String signatureName) {
-        String[] strings = signatureName.split("\\(");
-        String[] subStrings = strings[0].split(" ");
-        return subStrings[subStrings.length - 1];
-    }
-
-    // TODO Deprecate
-    public static String getMethodNameFromFileName(String methodFileName) {
-        String signatureName = getSignatureOfMethodFile(methodFileName);
-        String[] strings = signatureName.split("\\(");
-        String[] subStrings = strings[0].split(" ");
-        return subStrings[subStrings.length - 1];
-    }
-
     private static String extractSignature(String line) {
         return line.replaceFirst(" \\{|\\{", ";");
-    }
-
-    // TODO Deprecate
-    private static String getSignatureOfMethodFile(String fileName) {
-        FileReader fileReader;
-        BufferedReader bufferedReader;
-        String signatureOfMethod;
-        try {
-            fileReader = new FileReader(fileName);
-            bufferedReader = new BufferedReader(fileReader);
-            String line;
-            line = bufferedReader.readLine();
-            signatureOfMethod = extractSignature(line);
-            return signatureOfMethod;
-        } catch (IOException e) {
-            System.err.println("Input fileName [" + fileName + "] failed to run." + e.getMessage());
-            return null;
-        }
     }
 
     public static String getVirtualClassName(String functionName) {

@@ -98,11 +98,6 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         return args.toArray(new String[args.size()]);
     }
 
-    // TODO Deprecate
-    private String convertToClassName(String inputClassName) {
-        return inputClassName.replace("class ", "").replace(".", "/");
-    }
-
     public void compileToBytecode(long id, String methodFileName, String functionName) throws IOException, InterruptedException {
         OperatorInfo operatorInfo = OperatorParser.parse(methodFileName, functionName);
         if (operatorInfo == null) {

@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-//TODO Make methods static
 public class ElegantRequestHandler {
 
     private static String fileGeneratedPath;
