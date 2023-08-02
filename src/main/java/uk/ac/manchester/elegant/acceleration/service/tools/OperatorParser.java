@@ -95,7 +95,7 @@ public class OperatorParser {
             shouldParseObject = false;
             return;
         }
-        if (isLineEmpty(line) || lineStartsAComment(line)) {
+        if (isLineEmpty(line) || lineStartsAComment(line) || line.equals("{")) {
             return;
         }
         StringTokenizer tokenizer = new StringTokenizer(line, " ");
@@ -113,7 +113,11 @@ public class OperatorParser {
                     operatorObject.className = tokenizer.nextToken(" ");
                     operatorInfo.hashMapOfNameAndOperatorObjects.put(operatorObject.className, operatorObject);
                     operatorInfo.listOfOperatorObjectNames.add(operatorObject.className);
-                    tokenizer.nextToken(" "); // this should be the bracket {
+                    break;
+                case "{":
+                    break;
+                case "}":
+                    shouldParseObject = false;
                     break;
                 default:
                     String nextToken = tokenizer.nextToken(" ;");
@@ -146,8 +150,7 @@ public class OperatorParser {
     }
 
     private static void parseOperator(String line, OperatorInfo operatorInfo, String functionName) {
-        if (line.equals("}") || isLineEmpty(line) || lineStartsAComment(line)) {
-            // shouldParseObject = false;
+        if (line.equals("}") || isLineEmpty(line) || lineStartsAComment(line) || line.equals("{")) {
             return;
         }
 
