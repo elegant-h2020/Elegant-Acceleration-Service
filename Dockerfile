@@ -1,5 +1,4 @@
 FROM ubuntu:22.04
-# LABEL name="test-org/test-img"
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -24,15 +23,14 @@ WORKDIR /root/TornadoVM
 RUN ./scripts/tornadovm-installer --jdk graalvm-jdk-11 --backend opencl
 RUN /bin/sh -c . setvars.sh
 
-#RUN cmake --version
-
 # Clone the Acceleration Service
 WORKDIR /root
 RUN git clone https://github.com/elegant-h2020/Elegant-Acceleration-Service.git /root/Elegant-Acceleration-Service
+#COPY . /root/Elegant-Acceleration-Service # Used to debug the local repository
 
 # Define envirornment variables
 ENV SERVICE_HOME=/root/Elegant-Acceleration-Service
-ENV JAVA_HOME=/usr/lib/jvm/openjdk-8u222-b10
+ENV JAVA_HOME=/root/TornadoVM/etc/dependencies/TornadoVM-graalvm-jdk-11/graalvm-ce-java11-22.3.2
 ENV GLASSFISH_HOME=/glassfish6/glassfish/bin
 ENV TORNADOVM_ROOT=/root/TornadoVM
 
