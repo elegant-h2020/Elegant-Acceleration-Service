@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 # LABEL name="test-org/test-img"
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -22,15 +22,13 @@ RUN echo "AS_JAVA=/usr/lib/jvm/openjdk-8u222-b10" >> glassfish6/glassfish/config
 RUN git clone https://github.com/elegant-h2020/TornadoVM.git /root/TornadoVM && cd /root/TornadoVM && git checkout feat/service
 WORKDIR /root/TornadoVM
 RUN ./scripts/tornadovm-installer --jdk graalvm-jdk-11 --backend opencl
-RUN /bin/sh -c . setvars.sh 
+RUN /bin/sh -c . setvars.sh
 
 #RUN cmake --version
 
 # Clone the Acceleration Service
+WORKDIR /root
 RUN git clone https://github.com/elegant-h2020/Elegant-Acceleration-Service.git /root/Elegant-Acceleration-Service
-
-# bring service files from host into container
-#COPY . /root/Elegant/Elegant-Acceleration-Service
 
 # Define envirornment variables
 ENV SERVICE_HOME=/root/Elegant-Acceleration-Service
@@ -47,10 +45,6 @@ VOLUME /root/Elegant-Acceleration-Service/service_db
 # Build the service
 RUN /root/TornadoVM/etc/dependencies/apache-maven-3.9.3/bin/mvn clean install
 
-# build the sevice
-RUN mvn clean install
-
 EXPOSE 8080
 
-#ENTRYPOINT ["./start-glassfish-server.sh"]
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["./docker/start-glassfish-server.sh"]
