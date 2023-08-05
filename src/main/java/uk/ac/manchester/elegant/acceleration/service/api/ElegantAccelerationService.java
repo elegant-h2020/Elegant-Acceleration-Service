@@ -35,6 +35,7 @@ import jakarta.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Path("/acceleration")
@@ -163,6 +164,7 @@ public class ElegantAccelerationService {
         FileHandler.removeFile(ElegantRequestHandler.getUploadedFileInfoJsonFileName(requestId));
         FileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
         ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
+        FileHandler.removeFileAndContents(tornadoVM.getBoilerplateDirectory() + "/" + requestId);
 
         // Upload new files
         String codeFileUploadedPath = FileHandler.uploadFile(codeFileInputStream, codeFileMetaData);
@@ -202,6 +204,9 @@ public class ElegantAccelerationService {
 
         ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
         ElegantRequestHandler.removeUploadedFileNames(requestId);
+
+        FileHandler.removeFileAndContents(tornadoVM.getBoilerplateDirectory() + "/" + requestId);
+
         return ElegantRequestHandler.removeRequest(requestId);
     }
 }

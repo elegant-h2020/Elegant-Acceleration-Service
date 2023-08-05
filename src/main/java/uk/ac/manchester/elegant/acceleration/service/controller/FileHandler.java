@@ -202,7 +202,9 @@ public class FileHandler {
     }
 
     /**
-     * Receives and stores a file in $SERVICE_HOME/examples/uploaded and returns its absolute path as String.
+     * Receives and stores a file in $SERVICE_HOME/examples/uploaded and returns its
+     * absolute path as String.
+     * 
      * @param fileInputStream
      * @param fileMetaData
      *
@@ -235,6 +237,19 @@ public class FileHandler {
             return null;
         }
         return compilationRequest;
+    }
+
+    public static void removeFileAndContents(String fileName) {
+        File file = new File(fileName);
+        File[] allContents = file.listFiles();
+        if (allContents != null) {
+            for (File internalFile : allContents) {
+                if (internalFile.exists()) {
+                    internalFile.delete();
+                }
+            }
+        }
+        file.delete();
     }
 
     public static void removeFile(String fileName) {

@@ -73,6 +73,10 @@ public class LinuxTornadoVM implements TornadoVMInterface {
         return tornadoExitCode;
     }
 
+    public String getBoilerplateDirectory() {
+        return environmentTornadoVM.get(EnvironmentVariables.BOILERPLATE_DIR);
+    }
+
     private String[] getCommandForCompileToBytecode(long id, String functionName) {
         ArrayList<String> args = new ArrayList<>();
         args.add(environmentTornadoVM.get(EnvironmentVariables.JAVA_HOME) + "/bin/javac");
