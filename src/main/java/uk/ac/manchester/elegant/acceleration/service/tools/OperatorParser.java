@@ -248,6 +248,8 @@ public class OperatorParser {
                     return typeName;
                 } else if (numOfFields == 2) {
                     return "Double2";
+                } else if (numOfFields == 3) {
+                    return "Double3";
                 } else if (numOfFields == 4) {
                     return "Double4";
                 } else if (numOfFields == 8) {
@@ -255,12 +257,13 @@ public class OperatorParser {
                 } else if (numOfFields == 16) {
                     return "Double16";
                 }
-                break;
             case "float":
                 if (numOfFields == 1) {
                     return typeName;
                 } else if (numOfFields == 2) {
                     return "Float2";
+                } else if (numOfFields == 3) {
+                    return "Float3";
                 } else if (numOfFields == 4) {
                     return "Float4";
                 } else if (numOfFields == 8) {
@@ -268,12 +271,13 @@ public class OperatorParser {
                 } else if (numOfFields == 16) {
                     return "Float16";
                 }
-                break;
             case "long":
                 if (numOfFields == 1) {
                     return typeName;
                 } else if (numOfFields == 2) {
                     return "Long2";
+                } else if (numOfFields == 3) {
+                    return "Long3";
                 } else if (numOfFields == 4) {
                     return "Long4";
                 } else if (numOfFields == 8) {
@@ -281,12 +285,13 @@ public class OperatorParser {
                 } else if (numOfFields == 16) {
                     return "Long16";
                 }
-                break;
             case "int":
                 if (numOfFields == 1) {
                     return typeName;
                 } else if (numOfFields == 2) {
                     return "Int2";
+                } else if (numOfFields == 3) {
+                    return "Int3";
                 } else if (numOfFields == 4) {
                     return "Int4";
                 } else if (numOfFields == 8) {
@@ -294,7 +299,6 @@ public class OperatorParser {
                 } else if (numOfFields == 16) {
                     return "Int16";
                 }
-                break;
             default:
                 System.err.println("Not valid type in TornadoVM for operator type [" + typeName + "].");
                 break;
