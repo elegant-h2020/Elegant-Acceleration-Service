@@ -205,7 +205,9 @@ public class ClassGenerator {
                     ObjectField field = (ObjectField) fields.get(j);
                     String tornadoFieldName = getReadAccessOfTornadoFieldNameForIndex(fields, j);
                     if (line.contains(field.fieldName)) {
-                        line = line.replace(field.fieldName, tornadoFieldName);
+                        String nesInputAccessFieldName = operatorInfo.argumentNameList.get(i) + "." + field.fieldName;
+                        String tornadoAccessFieldName = operatorInfo.argumentNameList.get(i) + "." + tornadoFieldName;
+                        line = line.replace(nesInputAccessFieldName, tornadoAccessFieldName);
                     }
                 }
             }
