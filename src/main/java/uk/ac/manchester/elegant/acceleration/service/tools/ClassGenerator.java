@@ -19,9 +19,7 @@
  */
 package uk.ac.manchester.elegant.acceleration.service.tools;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +34,11 @@ import java.util.stream.Stream;
 public class ClassGenerator {
     private static final String SUFFIX = ".java";
     private static StringBuilder stringBuilder;
+    static AtomicBoolean skipObject = new AtomicBoolean(false);
+    static AtomicBoolean skipBlockCommentLines = new AtomicBoolean(false);
+    static AtomicBoolean skipMain = new AtomicBoolean(false);
+    static AtomicInteger numberOfOpenCurlyBrackets = new AtomicInteger(0);
+    static AtomicBoolean isParsingOperator = new AtomicBoolean(false);
 
     private static void emitPackagePrologue(StringBuilder sb, OperatorInfo operatorInfo) {
         sb.append("import uk.ac.manchester.tornado.api.annotations.Parallel;");
@@ -220,7 +223,6 @@ public class ClassGenerator {
             String variableName = operatorInfo.variableNameList.get(i);
             if (line.contains(variableName + ".")) {
                 OperatorObject pojo = operatorInfo.variableNameToTypeMap.get(variableName);
-
                 ArrayList fields = pojo.getListOfField();
                 for (int j = 0; j < fields.size(); j++) {
                     ObjectField field = (ObjectField) fields.get(j);
@@ -350,53 +352,112 @@ public class ClassGenerator {
         return sb.toString();
     }
 
+    private static boolean shouldFilterMain(String s) {
+        if (StaticAnalyzer.lineStartsAMainMethod(s) && s.contains("{")) {
+            numberOfOpenCurlyBrackets.incrementAndGet();
+            skipMain.set(true);
+            return true;
+        }
+        if (skipMain.get()) {
+            if (s.contains("{")) {
+                numberOfOpenCurlyBrackets.incrementAndGet();
+            }
+            if (s.contains("}")) {
+                if (numberOfOpenCurlyBrackets.getAndDecrement() == 1) {
+                    skipMain.set(false);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean shouldFilterOutOfScopeAndComments(String s) {
+        if (StaticAnalyzer.isLineOutOfScope(s) || StaticAnalyzer.lineStartsAComment(s) || StaticAnalyzer.lineStartsABlockComment(s) || StaticAnalyzer.isLineEmpty(s) || skipBlockCommentLines.get()) {
+            if (StaticAnalyzer.lineStartsABlockComment(s)) {
+                skipBlockCommentLines.set(true);
+            }
+            if (StaticAnalyzer.lineEndsABlockComment(s)) {
+                skipBlockCommentLines.set(false);
+            }
+            return true;
+        }
+        if (s.contains("public class") && s.contains("{")) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean shouldFilterInnerClasses(String s) {
+        if (!skipObject.get() && s.contains("static class")) {
+            skipObject.set(true);
+        }
+        if (skipObject.get()) {
+            if (s.contains("{")) {
+                numberOfOpenCurlyBrackets.set(numberOfOpenCurlyBrackets.get() + countBracketsInOperator(s, true));
+            } else if (s.contains("}")) {
+                numberOfOpenCurlyBrackets.set(numberOfOpenCurlyBrackets.get() - countBracketsInOperator(s, false));
+            }
+            if (numberOfOpenCurlyBrackets.get() == 0) {
+                skipObject.set(false);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static int countBracketsInOperator(String s, boolean openBracket) {
+        int countBracketsOfLine;
+        if (openBracket) {
+            countBracketsOfLine = (int) s.chars().filter(ch -> ch == '{').count();
+        } else {
+            countBracketsOfLine = (int) s.chars().filter(ch -> ch == '}').count();
+        }
+        return countBracketsOfLine;
+    }
+
+    private static boolean shouldParseOperator(String s, OperatorInfo operatorInfo) {
+        if (s.contains(" " + operatorInfo.udfName + "(")) {
+            isParsingOperator.set(true);
+            return true;
+        }
+        return false;
+    }
+
     public static String extractUdfBodyFromFileToString(String path, OperatorInfo operatorInfo) {
         StringBuilder contentBuilder = new StringBuilder();
-        AtomicBoolean skipObject = new AtomicBoolean(false);
-        AtomicInteger numberOfOpenCurlyBrackets = new AtomicInteger(0);
 
         try (Stream<String> stream = Files.lines(Paths.get(path), StandardCharsets.UTF_8)) {
 
-            // if (operatorInfo.udfName.equals("map")) {
-
             // Read the content with Stream
             stream.forEach(s -> {
-                if (!skipObject.get() && s.contains("class")) {
-                    skipObject.set(true);
+                if (shouldFilterMain(s) || shouldFilterOutOfScopeAndComments(s) || StaticAnalyzer.lineImplementsAFunction(s)) {
+                    return;
                 }
 
-                if (skipObject.get() && s.contains("{")) {
-                    numberOfOpenCurlyBrackets.incrementAndGet();
-                } else if (skipObject.get() && s.contains("}") && numberOfOpenCurlyBrackets.getAndDecrement() == 1) {
-                    skipObject.set(false);
-                } else if (!skipObject.get()) {
-                    if (isLineEmpty(s)) {
-                        contentBuilder.append(s).append("\n");
-                    } else {
-                        // 1. First change the NES UDF to be static
-                        String transformedSignature = changeMethodToStatic(s, operatorInfo);
+                // This check should be performed at an intermediate stage
+                if (shouldFilterInnerClasses(s)) {
+                    return;
+                }
 
-                        // 2. Replace objectTypes of input and output with TornadoTypes
-                        transformedSignature = transformUdfPojosInLine(transformedSignature, operatorInfo);
+                shouldParseOperator(s, operatorInfo);
 
-                        // 3. Replace Math with TornadoMath
-                        transformedSignature = transformMathToTornadoMath(transformedSignature);
-
-                        // FIXME Apply also casting if type is double
-
-                        // 4. Replace object fields with primitive variables of the same name
-                        transformedSignature = transformVariablePojoFieldsWithPrimitiveTypes(transformedSignature, operatorInfo);
-
-                        // 6. Replace accesses of fields of input objects with Tornado accesses
-                        transformedSignature = transformFieldsOfInputObjects(transformedSignature, operatorInfo);
-
-                        contentBuilder.append(transformedSignature).append("\n");
+                // Start Parsing the operator
+                if (isParsingOperator.get()) {
+                    if (trimFirstSpaceFromString(s).contains("{")) {
+                        numberOfOpenCurlyBrackets.set(numberOfOpenCurlyBrackets.get() + countBracketsInOperator(s, true));
                     }
+                    if (trimFirstSpaceFromString(s).contains("}")) {
+                        numberOfOpenCurlyBrackets.set(numberOfOpenCurlyBrackets.get() - countBracketsInOperator(s, false));
+                    }
+
+                    if (numberOfOpenCurlyBrackets.get() == 0) {
+                        isParsingOperator.set(false);
+                    }
+                    final String transformedSignature = tornadifyOperator(operatorInfo, s);
+                    contentBuilder.append(transformedSignature).append("\n");
                 }
             });
-            // } else {
-            // stream.forEach(s -> contentBuilder.append(s).append("\n"));
-            // }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -404,8 +465,28 @@ public class ClassGenerator {
         return contentBuilder.toString();
     }
 
-    private static boolean isLineEmpty(String string) {
-        return string.equals("\t") || string.equals(" ");
+    private static String trimFirstSpaceFromString(String string) {
+        return string.replaceFirst("\\s+", "");
+    }
+
+    private static String tornadifyOperator(OperatorInfo operatorInfo, String s) {
+        // 1. First change the NES UDF to be static
+        String transformedSignature = changeMethodToStatic(s, operatorInfo);
+
+        // 2. Replace objectTypes of input and output with TornadoTypes
+        transformedSignature = transformUdfPojosInLine(transformedSignature, operatorInfo);
+
+        // 3. Replace Math with TornadoMath
+        transformedSignature = transformMathToTornadoMath(transformedSignature);
+
+        // FIXME Apply also casting if type is double
+
+        // 4. Replace object fields with primitive variables of the same name
+        transformedSignature = transformVariablePojoFieldsWithPrimitiveTypes(transformedSignature, operatorInfo);
+
+        // 6. Replace accesses of fields of input objects with Tornado accesses
+        transformedSignature = transformFieldsOfInputObjects(transformedSignature, operatorInfo);
+        return transformedSignature;
     }
 
     public static void writeClassToFile(String classBody, String fileName) {

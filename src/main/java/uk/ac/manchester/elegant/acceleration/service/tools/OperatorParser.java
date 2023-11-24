@@ -54,14 +54,6 @@ public class OperatorParser {
         }
     }
 
-    static boolean isLineEmpty(String string) {
-        return string.equals("\t") || string.equals(" ");
-    }
-
-    private static boolean lineStartsAComment(String line) {
-        return line.startsWith("//");
-    }
-
     private static int getNumberOfInputs(String line) {
         int stringTokenizer = new StringTokenizer(line, ",").countTokens();
         return stringTokenizer;
@@ -73,12 +65,16 @@ public class OperatorParser {
         }
     }
 
+    private static boolean firstFilterOfLine(String line) {
+        return StaticAnalyzer.isLineEmpty(line) || StaticAnalyzer.lineStartsAComment(line) || StaticAnalyzer.lineImplementsAFunction(line);
+    }
+
     private static void parseLine(String line, OperatorInfo operatorInfo, String functionName) throws IOException {
-        if (isLineEmpty(line) || lineStartsAComment(line)) {
+        if (firstFilterOfLine(line)) {
             return;
         }
 
-        if (line.contains("class")) {
+        if (StaticAnalyzer.lineContainsStaticClass(line)) {
             shouldParseObject = true;
             operatorObject = new OperatorObject();
         }
@@ -93,9 +89,6 @@ public class OperatorParser {
     private static void parseObjectClass(String line, OperatorObject operatorObject, OperatorInfo operatorInfo) {
         if (line.equals("}")) {
             shouldParseObject = false;
-            return;
-        }
-        if (isLineEmpty(line) || lineStartsAComment(line) || line.equals("{")) {
             return;
         }
         StringTokenizer tokenizer = new StringTokenizer(line, " ");
@@ -150,7 +143,8 @@ public class OperatorParser {
     }
 
     private static void parseOperator(String line, OperatorInfo operatorInfo, String functionName) {
-        if (line.equals("}") || isLineEmpty(line) || lineStartsAComment(line) || line.equals("{")) {
+        if (line.equals("}") || StaticAnalyzer.isLineEmpty(line) || StaticAnalyzer.lineStartsAComment(line) || line.equals("{") || StaticAnalyzer.lineImplementsAFunction(line)
+                || StaticAnalyzer.isLineOutOfScope(line) || StaticAnalyzer.lineStartsAMainMethod(line)) {
             return;
         }
 
