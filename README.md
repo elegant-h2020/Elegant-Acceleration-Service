@@ -192,6 +192,11 @@ This request returns the state of the request with `id` 2:
 curl -X DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/2/
 ```
 
+### E. To delete all submitted request:
+```bash
+curl -X DELETE http://localhost:8080/ElegantAccelerationService-1.0-SNAPSHOT/api/acceleration/clean
+```
+
 ## Licenses
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-red.svg)]([https://github.com/beehive-lab/TornadoVM/blob/master/LICENSE_APACHE2](https://github.com/stratika/elegant-acceleration-service/blob/main/LICENSE.txt))

@@ -104,7 +104,7 @@ public class ElegantAccelerationService {
     @Path("/count")
     @Produces("text/plain")
     public String getCount() {
-        return String.valueOf(ElegantRequestHandler.getAllRequests().size()); // kernelMap.size()
+        return String.valueOf(ElegantRequestHandler.getAllRequests().size());
     }
 
     @POST
@@ -208,5 +208,27 @@ public class ElegantAccelerationService {
         FileHandler.removeFileAndContents(tornadoVM.getBoilerplateDirectory() + "/" + requestId);
 
         return ElegantRequestHandler.removeRequest(requestId);
+    }
+
+    @DELETE
+    @Path("/clean")
+    @Produces("text/plain")
+    public String cleanRequests(@PathParam("clean") long clean) {
+        ElegantRequestHandler.getAllRequests().forEach(request -> {
+            FileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(request.getId()));
+            FileHandler.removeFile(ElegantRequestHandler.getUploadedDeviceJsonFileName(request.getId()));
+            FileHandler.removeFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(request.getId()));
+            FileHandler.removeFile(ElegantRequestHandler.getUploadedFileInfoJsonFileName(request.getId()));
+            FileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(request.getId()));
+            FileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getUploadedParameterSizeJsonFileName(request.getId()));
+            FileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getGeneratedKernelFileName(request.getId()));
+
+            ElegantRequestHandler.removeKernelFileNameFromMap(request.getId());
+            ElegantRequestHandler.removeUploadedFileNames(request.getId());
+
+            FileHandler.removeFileAndContents(tornadoVM.getBoilerplateDirectory() + "/" + request.getId());
+            ElegantRequestHandler.removeRequest(request.getId());
+        });
+        return "All entries have been deleted.";
     }
 }
