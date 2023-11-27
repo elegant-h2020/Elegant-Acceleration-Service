@@ -12,12 +12,18 @@ Acceleration Webservice. All dependencies are available in the [pom.xml](pom.xml
 
 ## 1. Installation/Deployment
 
-The service can be installed and deployed via building and launching a docker image that handles all the dependencies and builds in an automated manner (Step A).
-Alternatively, it can be built locally as described in Step B.
+The service can be installed and deployed via building and launching a docker image that handles all the dependencies and builds in an automated manner ([Step A](https://github.com/elegant-h2020/Elegant-Acceleration-Service/tree/main#a-automated-deployment-via-the-docker-containerized-service)).
+Alternatively, it can be built locally as described in [Step B](https://github.com/elegant-h2020/Elegant-Acceleration-Service/tree/main#b-run-an-example-of-postget-requests-from-the-terminal-and-from-the-path-of-the-repository-since-the-examples-use-relative-paths).
 
 ### A. Automated deployment via the Docker containerized service
 
-A script is provided that creates a volume that is used from the docker image, it builds the image (~5 minutes) and it launches the generated image.
+The docker image is uploaded in [docker hub](https://hub.docker.com/repository/docker/beehivelab/acceleration-service-container). So you can pull the image:
+```bash
+docker pull beehivelab/acceleration-service-container:latest
+./docker/launchWithDocker.sh --launch
+```
+
+Alternatively, you can manually build the dockerized service. A script is provided that creates a volume that is used from the docker image, builds the image (~5 minutes) and it launches the generated image.
 ```bash
 Please run:
   ./docker/launchWithDocker.sh --buildAndLaunch  #to build and launch the image, or
