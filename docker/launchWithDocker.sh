@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 IMAGE=acceleration-service-container
-TAG_VERSION=0.1
+TAG_VERSION=1.0
 
 if [[ "$1" == "--buildAndLaunch" ]]; then
     docker volume create elegant_service_files
