@@ -47,7 +47,6 @@ public class ElegantAccelerationService {
 
     public ElegantAccelerationService() throws IOException {
         newTornadoVMInstance();
-        // tornadoVM.buildTornadoVM();
     }
 
     private void newTornadoVMInstance() {
@@ -56,7 +55,7 @@ public class ElegantAccelerationService {
             ElegantRequestHandler.setFileGeneratedPath(tornadoVM.getEnvironmentVariable(EnvironmentVariables.GENERATED_KERNELS_DIR));
             FileHandler.setFileUploadedPath(tornadoVM.getEnvironmentVariable(EnvironmentVariables.UPLOADED_DIR));
         } else {
-            throw new UnsupportedOperationException("The Acceleration Service is not supported for " + OS + ".");
+            throw new UnsupportedOperationException("The Acceleration Service is not supported for " + OS + ".\n");
         }
     }
 
@@ -70,9 +69,7 @@ public class ElegantAccelerationService {
     @Path("/{requestId}/info")
     @Produces(MediaType.APPLICATION_JSON)
     public CompilationRequest retrieveRequest(@PathParam("requestId") long requestId) {
-        System.out.println("The generated kernelFileName for request [" + requestId + "] of code is: " + ElegantRequestHandler.getGeneratedKernelFileName(requestId));
-        System.out.println("The uploaded jsonFileName for request [" + requestId + "] of code is: " + ElegantRequestHandler.getUploadedDeviceJsonFileName(requestId));
-        return ElegantRequestHandler.getRequest(requestId); // TODO Avoid creating an object. Use the class name and make methods static.
+        return ElegantRequestHandler.getRequest(requestId);
     }
 
     @GET
@@ -85,7 +82,7 @@ public class ElegantAccelerationService {
             response.header("Content-Disposition", "attachment;filename=" + ElegantRequestHandler.getFileNameOfAccelerationCode(requestId));
             return response.build();
         } else {
-            return Response.status(Response.Status.EXPECTATION_FAILED).entity("File not found.").build();
+            return Response.status(Response.Status.EXPECTATION_FAILED).entity("File not found.\n").build();
         }
     }
 
@@ -116,14 +113,14 @@ public class ElegantAccelerationService {
             @FormDataParam("jsonFile") InputStream jsonFileInputStream, //
             @FormDataParam("jsonFile") FormDataContentDisposition jsonFileMetaData) throws IOException, InterruptedException {
         TransactionMetaData transactionMetaData = null;
-        String msg = "Accepted request. Files uploaded.";
+        String msg = "Accepted request. Files uploaded.\n";
 
         String codeFileUploadedPath = FileHandler.uploadFile(codeFileInputStream, codeFileMetaData);
         String jsonFileUploadedPath = FileHandler.uploadFile(jsonFileInputStream, jsonFileMetaData);
         CompilationRequest compilationRequest = FileHandler.receiveRequest(jsonFileMetaData.getFileName());
 
         if (compilationRequest == null) {
-            msg = "Problem with uploaded files. See server log for more detail.";
+            msg = "Problem with uploaded files. See server log for more detail.\n";
             transactionMetaData = new TransactionMetaData(compilationRequest, null, null, null, Response.status(Response.Status.BAD_REQUEST).entity(msg).build());
         } else {
             transactionMetaData = new TransactionMetaData(compilationRequest, codeFileUploadedPath, jsonFileUploadedPath, null, Response.status(Response.Status.ACCEPTED).entity(msg).build());
@@ -155,7 +152,7 @@ public class ElegantAccelerationService {
             @FormDataParam("jsonFile") InputStream jsonFileInputStream, //
             @FormDataParam("jsonFile") FormDataContentDisposition jsonFileMetaData) throws IOException, InterruptedException {
         TransactionMetaData transactionMetaData = null;
-        String msg = "Accepted request. Files uploaded.";
+        String msg = "Accepted request. Files uploaded.\n";
 
         // Remove existing files related to requestId
         FileHandler.removeFile(ElegantRequestHandler.getUploadedFunctionFileName(requestId));
@@ -172,7 +169,7 @@ public class ElegantAccelerationService {
         CompilationRequest compilationRequest = FileHandler.receiveRequest(jsonFileMetaData.getFileName());
 
         if (compilationRequest == null) {
-            msg = "Problem with uploaded files. See server log for more detail.";
+            msg = "Problem with uploaded files. See server log for more detail.\n";
             transactionMetaData = new TransactionMetaData(compilationRequest, null, null, null, Response.status(Response.Status.BAD_REQUEST).entity(msg).build());
         } else {
             transactionMetaData = new TransactionMetaData(compilationRequest, codeFileUploadedPath, jsonFileUploadedPath, null, Response.status(Response.Status.ACCEPTED).entity(msg).build());
@@ -229,6 +226,6 @@ public class ElegantAccelerationService {
             FileHandler.removeFileAndContents(tornadoVM.getBoilerplateDirectory() + "/" + request.getId());
             ElegantRequestHandler.removeRequest(request.getId());
         });
-        return "All entries have been deleted.";
+        return "All entries have been deleted.\n";
     }
 }
