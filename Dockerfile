@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    build-essential ocl-icd-opencl-dev opencl-headers clinfo g++ gcc make git curl wget maven unzip rsync python3 python3-pip \
+    build-essential tree ocl-icd-opencl-dev opencl-headers clinfo g++ gcc make git curl wget maven unzip rsync python3 python3-pip \
     && apt-get clean && python3 -m pip install wget
 
 # Java 8 u222

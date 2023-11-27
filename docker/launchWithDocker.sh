@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
+IMAGE=acceleration-service-container
+TAG_VERSION=0.1
+
 if [[ "$1" == "--buildAndLaunch" ]]; then
     docker volume create elegant_service_files
-    docker build $2 -t elegant-acceleration-service-container .
-    docker run -it -p 8080:8080 -v elegant_service_files:/root/Elegant-Acceleration-Service/service_db elegant-acceleration-service-container
+    docker build --no-cache -t $IMAGE .
+    docker tag $IMAGE beehivelab/$IMAGE:$TAG_VERSION
+    docker tag $IMAGE beehivelab/$IMAGE:latest
+    docker run -it -p 8080:8080 -v "$PWD":/elegant_service_files beehivelab/acceleration-service-container:latest
 elif [[ "$1" == "--launch" ]]; then
-    docker run -it -p 8080:8080 -v elegant_service_files:/root/Elegant-Acceleration-Service/service_db elegant-acceleration-service-container
+    docker run -it -p 8080:8080 -v "$PWD":/elegant_service_files beehivelab/acceleration-service-container:latest
 elif [[ "$1" == "--deleteVolume" ]]; then
     docker volume rm elegant_service_files
 else
