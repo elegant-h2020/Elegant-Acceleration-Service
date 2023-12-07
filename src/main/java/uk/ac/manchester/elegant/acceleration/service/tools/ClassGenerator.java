@@ -424,6 +424,16 @@ public class ClassGenerator {
         return false;
     }
 
+    private static String changeConstantValueToStatic(String line) {
+        StringBuilder sb = new StringBuilder();
+        String[] subStrings = line.split(" final", 2);
+
+        sb.append(subStrings[0]);
+        sb.append(" static final");
+        sb.append(subStrings[1]);
+        return sb.toString();
+    }
+
     public static String extractUdfBodyFromFileToString(String path, OperatorInfo operatorInfo) {
         StringBuilder contentBuilder = new StringBuilder();
 
@@ -456,6 +466,15 @@ public class ClassGenerator {
                     }
                     final String transformedSignature = tornadifyOperator(operatorInfo, s);
                     contentBuilder.append(transformedSignature).append("\n");
+                } else {
+                    if (StaticAnalyzer.lineHasConstantValue(s)) {
+                        if (!StaticAnalyzer.lineContainsStatic(s)) {
+                            final String constantValue = changeConstantValueToStatic(s);
+                            contentBuilder.append(constantValue).append("\n");
+                        } else {
+                            contentBuilder.append(s).append("\n");
+                        }
+                    }
                 }
             });
         } catch (IOException e) {

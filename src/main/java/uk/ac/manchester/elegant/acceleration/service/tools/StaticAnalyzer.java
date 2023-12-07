@@ -33,7 +33,15 @@ public class StaticAnalyzer {
     }
 
     static boolean lineContainsStaticClass(String line) {
-        return line.contains("static class");
+        return line.contains("static class") || (line.contains("class") && !(line.contains("public")));
+    }
+
+    static boolean lineHasConstantValue(String line) {
+        return line.contains("final");
+    }
+
+    static boolean lineContainsStatic(String line) {
+        return line.contains("static");
     }
 
     static boolean lineEndsABlockComment(String line) {
