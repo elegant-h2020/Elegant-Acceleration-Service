@@ -26,6 +26,7 @@ import uk.ac.manchester.elegant.acceleration.service.controller.ElegantRequestHa
 import uk.ac.manchester.elegant.acceleration.service.controller.CompilationRequest;
 import uk.ac.manchester.elegant.acceleration.service.controller.FileHandler;
 import uk.ac.manchester.elegant.acceleration.service.controller.EnvironmentVariables;
+import uk.ac.manchester.elegant.acceleration.service.controller.FileInfo;
 import uk.ac.manchester.elegant.acceleration.service.controller.TransactionMetaData;
 import uk.ac.manchester.elegant.acceleration.service.tools.LinuxTornadoVM;
 
@@ -35,7 +36,6 @@ import jakarta.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Path("/acceleration")
@@ -142,6 +142,28 @@ public class ElegantAccelerationService {
 
     }
 
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/submit_prebuilt")
+    public Response uploadPrebuilt() throws IOException, InterruptedException {
+        TransactionMetaData transactionMetaData = null;
+        String msg = "Accepted request.\n";
+
+        FileInfo fileInfo = new FileInfo("map");
+        CompilationRequest compilationRequest = new CompilationRequest(fileInfo, null, null);
+        transactionMetaData = new TransactionMetaData(compilationRequest, null, null, null, Response.status(Response.Status.ACCEPTED).entity(msg).build());
+
+        long uid = ElegantRequestHandler.incrementAndGetUid();
+        transactionMetaData.getCompilationRequest().setId(uid);
+        ElegantRequestHandler.addRequest(transactionMetaData.getCompilationRequest());
+
+        ElegantRequestHandler.compilePrebuilt(tornadoVM, transactionMetaData);
+
+        return transactionMetaData.response;
+
+    }
+
     @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_PLAIN)
@@ -203,6 +225,19 @@ public class ElegantAccelerationService {
         ElegantRequestHandler.removeUploadedFileNames(requestId);
 
         FileHandler.removeFileAndContents(tornadoVM.getBoilerplateDirectory() + "/" + requestId);
+
+        return ElegantRequestHandler.removeRequest(requestId);
+    }
+
+    @DELETE
+    @Path("/delete_prebuilt/{requestId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public CompilationRequest deletePrebuilt(@PathParam("requestId") long requestId) {
+        FileHandler.removeFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+        FileHandler.removeParentDirectoryOfFile(ElegantRequestHandler.getGeneratedKernelFileName(requestId));
+
+        ElegantRequestHandler.removeKernelFileNameFromMap(requestId);
+        ElegantRequestHandler.removeUploadedFileNames(requestId);
 
         return ElegantRequestHandler.removeRequest(requestId);
     }

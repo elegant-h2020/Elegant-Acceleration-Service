@@ -19,13 +19,20 @@
  */
 package uk.ac.manchester.elegant.acceleration.service.controller;
 
+import jakarta.ws.rs.WebApplicationException;
 import uk.ac.manchester.elegant.acceleration.service.tools.LinuxTornadoVM;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -200,5 +207,48 @@ public class ElegantRequestHandler {
                 .build();
 
         return message;
+    }
+
+    public static String compilePrebuilt(LinuxTornadoVM tornadoVM, TransactionMetaData transactionMetaData) throws IOException, InterruptedException {
+        String message = null;
+        Response.Status status = null;
+        CompilationRequest compilerRequest = transactionMetaData.getCompilationRequest();
+        File idDirectory = new File(fileGeneratedPath + File.separator + compilerRequest.getId());
+        if (!idDirectory.exists()) {
+            idDirectory.mkdirs();
+        }
+        mapOfGeneratedKernelNames.put(compilerRequest.getId(), fileGeneratedPath + File.separator + compilerRequest.getId() + File.separator + "map.cl");
+
+        uploadPrebuiltFile(tornadoVM, mapOfGeneratedKernelNames.get(compilerRequest.getId()));
+
+        transactionMetaData.getCompilationRequest().setState(CompilationRequest.State.COMPLETED);
+        message = "The request has been completed.\n" + "New code acceleration request has been registered (#" + transactionMetaData.getCompilationRequest().getId() + ")\n";
+        status = Response.Status.ACCEPTED;
+
+        transactionMetaData.response = Response//
+                .status(status)//
+                .type(MediaType.TEXT_PLAIN_TYPE)//
+                .entity(message)//
+                .build();
+
+        return message;
+    }
+
+    public static void uploadPrebuiltFile(LinuxTornadoVM tornadoVM, String copied) {
+        try {
+            String serviceHome = tornadoVM.getEnvironmentVariable(EnvironmentVariables.SERVICE_HOME);
+            final File prebuiltFile = new File(serviceHome + "/service_db/prebuilt/map.cl");
+            InputStream in = new BufferedInputStream(new FileInputStream(prebuiltFile));
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(copied));
+
+            byte[] bytes = new byte[1024];
+            int lengthRead;
+            while ((lengthRead = in.read(bytes)) > 0) {
+                out.write(bytes, 0, lengthRead);
+                out.flush();
+            }
+        } catch (IOException e) {
+            throw new WebApplicationException("Error while uploading file. Please try again !!");
+        }
     }
 }
