@@ -25,7 +25,7 @@ RUN /bin/sh -c . setvars.sh
 
 # Clone the Acceleration Service
 WORKDIR /root
-RUN git clone https://github.com/elegant-h2020/Elegant-Acceleration-Service.git /root/Elegant-Acceleration-Service
+RUN git clone https://github.com/elegant-h2020/Elegant-Acceleration-Service.git /root/Elegant-Acceleration-Service && cd /root/Elegant-Acceleration-Service && git checkout feat/demo
 #COPY . /root/Elegant-Acceleration-Service # Used to debug the local repository
 
 # Define envirornment variables
